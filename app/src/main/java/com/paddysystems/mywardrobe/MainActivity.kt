@@ -22,6 +22,12 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 
+import android.net.Uri
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -40,10 +46,14 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WardrobeScreen(modifier: Modifier = Modifier) {
+    var selectedImageUri by remember {
+        mutableStateOf<Uri?>(null)
+    }
+
     val imagePicker = rememberLauncherForActivityResult(
         contract = PickVisualMedia()
     ) { uri ->
-        // We'll use the selected image next
+        selectedImageUri = uri
     }
 
     Column(
@@ -53,6 +63,10 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
     ) {
         Text("My Wardrobe")
         Text("No items yet")
+
+        if (selectedImageUri != null) {
+            Text("Image selected")
+        }
 
         Button(
             onClick = {
