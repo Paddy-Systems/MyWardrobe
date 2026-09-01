@@ -1,8 +1,4 @@
 package com.paddysystems.mywardrobe
-
-import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.activity.result.PickVisualMediaRequest
-import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
@@ -29,7 +25,11 @@ import com.paddysystems.mywardrobe.ui.components.AddItemButton
 import com.paddysystems.mywardrobe.ui.components.WardrobeHeader
 
 @Composable
-fun WardrobeScreen(modifier: Modifier = Modifier) {
+fun WardrobeScreen(
+    modifier: Modifier = Modifier,
+    onAddItemClick: () -> Unit = {},
+    onItemClick: (File) -> Unit = {}
+) {
     val context = LocalContext.current
 
     var searchQuery by remember {
@@ -47,18 +47,6 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
     val images = remember {
         mutableStateListOf<File>().apply {
             addAll(loadImages(context))
-        }
-    }
-
-    val imagePicker = rememberLauncherForActivityResult(
-        contract = PickVisualMedia()
-    ) { uri ->
-        if (uri != null) {
-            val savedImage = saveImage(context, uri)
-
-            if (savedImage != null) {
-                images.add(savedImage)
-            }
         }
     }
 
@@ -109,6 +97,8 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
                     } else {
                         selectedImages.add(imageFile)
                     }
+                } else {
+                    onItemClick(imageFile)
                 }
             },
             onImageLongClick = { imageFile ->
@@ -142,13 +132,7 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
         }
 
         AddItemButton(
-            onClick = {
-                imagePicker.launch(
-                    PickVisualMediaRequest(
-                        PickVisualMedia.ImageOnly
-                    )
-                )
-            }
+            onClick = onAddItemClick
         )
     }
 }
