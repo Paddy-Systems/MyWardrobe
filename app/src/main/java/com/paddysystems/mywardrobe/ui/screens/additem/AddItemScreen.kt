@@ -31,6 +31,7 @@ import com.paddysystems.mywardrobe.ml.FashionSigLipEncoder
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
+import com.paddysystems.mywardrobe.ml.ClothingEmbeddingMatcher
 
 @Composable
 fun AddItemScreen(
@@ -121,26 +122,35 @@ fun AddItemScreen(
                         ?: return@LaunchedEffect
 
                     try {
-                        val embedding = withContext(Dispatchers.IO) {
+                        val matches = withContext(Dispatchers.IO) {
                             val encoder = FashionSigLipEncoder(
                                 context.applicationContext
                             )
 
-                            encoder.encode(imageUri)
+                            val embedding = encoder.encode(
+                                imageUri
+                            )
+
+                            val matcher = ClothingEmbeddingMatcher(
+                                context.applicationContext
+                            )
+
+                            matcher.topMatches(
+                                imageEmbedding = embedding,
+                                limit = 5
+                            )
                         }
-
                         Log.d(
                             "FashionSigLIP",
-                            "Embedding size: ${embedding.size}"
-                        )
+                            buildString {
+                                appendLine("Top clothing matches:")
 
-                        Log.d(
-                            "FashionSigLIP",
-                            "First values: ${
-                                embedding
-                                    .take(5)
-                                    .joinToString()
-                            }"
+                                matches.forEach { match ->
+                                    appendLine(
+                                        "${match.id}: ${match.similarity}"
+                                    )
+                                }
+                            }
                         )
                     } catch (exception: Exception) {
                         Log.e(
