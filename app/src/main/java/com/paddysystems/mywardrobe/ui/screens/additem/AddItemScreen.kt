@@ -33,6 +33,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.paddysystems.mywardrobe.ml.ClothingEmbeddingMatcher
 import com.paddysystems.mywardrobe.ml.ColourEmbeddingMatcher
+import com.paddysystems.mywardrobe.ui.screens.additem.components.ItemImagePreview
+import com.paddysystems.mywardrobe.ui.screens.additem.components.ClothingTypeSelector
 
 @Composable
 fun AddItemScreen(
@@ -156,6 +158,7 @@ fun AddItemScreen(
                                         5
                                     )
                                 )
+
                             }
                         Log.d(
                             "FashionSigLIP",
@@ -181,6 +184,16 @@ fun AddItemScreen(
                                 }
                             }
                         )
+                        predictedClothingTypeId =
+                            clothingMatches.firstOrNull()?.id
+
+                        predictedColours =
+                            colourMatches
+                                .firstOrNull()
+                                ?.let { listOf(it.id) }
+                                ?: emptyList()
+
+                        currentStep = AddItemStep.DETAILS
                     } catch (exception: Exception) {
                         Log.e(
                             "FashionSigLIP",
@@ -197,7 +210,34 @@ fun AddItemScreen(
             }
 
             AddItemStep.DETAILS -> {
-                Text("Item details")
+                Column {
+                    selectedImageUri?.let { imageUri ->
+                        ItemImagePreview(
+                            imageUri = imageUri
+                        )
+
+                        Spacer(
+                            modifier = Modifier.height(16.dp)
+                        )
+                    }
+
+                    Text("Item details")
+
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
+
+                    ClothingTypeSelector(
+                        selectedTypeId = predictedClothingTypeId,
+                        onTypeSelected = { typeId ->
+                            predictedClothingTypeId = typeId
+                        }
+                    )
+
+                    Text(
+                        "Colours: ${predictedColours.joinToString()}"
+                    )
+                }
             }
         }
 
