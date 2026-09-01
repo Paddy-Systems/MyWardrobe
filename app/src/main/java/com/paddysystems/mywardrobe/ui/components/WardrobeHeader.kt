@@ -8,16 +8,42 @@ import androidx.compose.ui.Modifier
 @Composable
 fun WardrobeHeader(
     itemCount: Int,
+    totalItemCount: Int,
     selectedCount: Int,
     modifier: Modifier = Modifier
 ) {
-    Text(
-        text = if (selectedCount == 0) {
-            "My Wardrobe · $itemCount items"
-        } else {
+    val text =
+        if (selectedCount > 0) {
             "$selectedCount selected"
-        },
-        style = MaterialTheme.typography.headlineLarge,
+        } else if (
+            itemCount == totalItemCount
+        ) {
+            "My Wardrobe · " +
+                    "$totalItemCount " +
+                    itemWord(totalItemCount)
+        } else {
+            "My Wardrobe · " +
+                    "$itemCount of " +
+                    "$totalItemCount " +
+                    itemWord(totalItemCount)
+        }
+
+    Text(
+        text = text,
+        style =
+            MaterialTheme
+                .typography
+                .headlineLarge,
         modifier = modifier
     )
+}
+
+private fun itemWord(
+    count: Int
+): String {
+    return if (count == 1) {
+        "item"
+    } else {
+        "items"
+    }
 }

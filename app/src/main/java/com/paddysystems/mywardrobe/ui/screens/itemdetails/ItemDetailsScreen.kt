@@ -20,6 +20,10 @@ import coil3.compose.AsyncImage
 import com.paddysystems.mywardrobe.data.model.defaultClothingTypes
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItem
 import java.io.File
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.paddysystems.mywardrobe.data.model.wardrobeLabel
+import com.paddysystems.mywardrobe.ui.screens.itemdetails.components.SemanticMetadataSection
 
 @Composable
 fun ItemDetailsScreen(
@@ -69,6 +73,9 @@ fun ItemDetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .verticalScroll(
+                rememberScrollState()
+            )
             .padding(16.dp)
     ) {
         Text("Item Details")
@@ -98,14 +105,28 @@ fun ItemDetailsScreen(
         )
 
         Text(
-            "Colours: ${
-                item.colours.joinToString {
-                        colour ->
-                    colour.replaceFirstChar {
-                        it.uppercase()
-                    }
-                }
-            }"
+            text =
+                "Colours: ${
+                    item.colours
+                        .joinToString {
+                            wardrobeLabel(it)
+                        }
+                }"
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(24.dp)
+        )
+
+        SemanticMetadataSection(
+            metadata =
+                item.metadata
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(24.dp)
         )
 
         Spacer(
@@ -124,6 +145,9 @@ fun ItemDetailsScreen(
         )
 
         Button(
+            modifier =
+                Modifier.fillMaxWidth(),
+
             onClick = onBack
         ) {
             Text("Back")

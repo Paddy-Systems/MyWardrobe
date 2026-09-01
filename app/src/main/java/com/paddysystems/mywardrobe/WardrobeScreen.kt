@@ -32,6 +32,7 @@ import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
 import com.paddysystems.mywardrobe.data.storage.deleteWardrobeItem
 import com.paddysystems.mywardrobe.search.WardrobeSearchEngine
+import com.paddysystems.mywardrobe.ui.components.WardrobeActiveControls
 
 @Composable
 fun WardrobeScreen(
@@ -104,13 +105,24 @@ fun WardrobeScreen(
                     searchQuery.isNotBlank()
             )
 
+    val hasActiveControls =
+        searchQuery.isNotBlank() ||
+                !filters.isEmpty ||
+                sortOrder !=
+                WardrobeSortOrder.AUTO
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         WardrobeHeader(
-            itemCount = visibleItems.size,
+            itemCount =
+                visibleItems.size,
+
+            totalItemCount =
+                items.size,
+
             selectedCount =
                 selectedItems.size
         )
@@ -127,15 +139,25 @@ fun WardrobeScreen(
             modifier = Modifier.height(12.dp)
         )
         WardrobeToolbar(
-            searchQuery = searchQuery,
+            searchQuery =
+                searchQuery,
 
             onSearchQueryChange = { query ->
                 searchQuery = query
                 selectedItems.clear()
             },
 
+            onClearSearch = {
+                searchQuery = ""
+                selectedItems.clear()
+            },
+
             activeFilterCount =
                 filters.activeCount,
+
+            sortIsActive =
+                sortOrder !=
+                        WardrobeSortOrder.AUTO,
 
             onFilterClick = {
                 showFilterDialog = true
@@ -145,6 +167,56 @@ fun WardrobeScreen(
                 showSortDialog = true
             }
         )
+
+        Spacer(
+            modifier =
+                Modifier.height(8.dp)
+        )
+
+        if (hasActiveControls) {
+            WardrobeActiveControls(
+                filters = filters,
+
+                sortOrder =
+                    sortOrder,
+
+                hasSearchQuery =
+                    searchQuery.isNotBlank(),
+
+                onFiltersChange = {
+                        updatedFilters ->
+
+                    filters =
+                        updatedFilters
+
+                    selectedItems.clear()
+                },
+
+                onSortReset = {
+                    sortOrder =
+                        WardrobeSortOrder.AUTO
+
+                    selectedItems.clear()
+                },
+
+                onResetAll = {
+                    searchQuery = ""
+
+                    filters =
+                        WardrobeFilters()
+
+                    sortOrder =
+                        WardrobeSortOrder.AUTO
+
+                    selectedItems.clear()
+                }
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(8.dp)
+            )
+        }
 
         Spacer(
             modifier = Modifier.height(8.dp)

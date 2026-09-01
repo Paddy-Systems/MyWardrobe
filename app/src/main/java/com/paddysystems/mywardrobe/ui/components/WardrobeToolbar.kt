@@ -14,12 +14,15 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.material3.IconButton
 
 @Composable
 fun WardrobeToolbar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    onClearSearch: () -> Unit,
     activeFilterCount: Int,
+    sortIsActive: Boolean,
     onFilterClick: () -> Unit,
     onSortClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -43,7 +46,22 @@ fun WardrobeToolbar(
             colors = OutlinedTextFieldDefaults.colors(
                 focusedBorderColor = MaterialTheme.colorScheme.primary,
                 unfocusedBorderColor = MaterialTheme.colorScheme.outline
-            )
+            ),
+            trailingIcon = {
+                if (searchQuery.isNotEmpty()) {
+                    IconButton(
+                        onClick = onClearSearch
+                    ) {
+                        Text(
+                            text = "×",
+                            style =
+                                MaterialTheme
+                                    .typography
+                                    .titleLarge
+                        )
+                    }
+                }
+            },
         )
 
         Button(
@@ -75,7 +93,13 @@ fun WardrobeToolbar(
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
         ) {
-            Text("Sort")
+            Text(
+                if (sortIsActive) {
+                    "Sort ✓"
+                } else {
+                    "Sort"
+                }
+            )
         }
     }
 }
