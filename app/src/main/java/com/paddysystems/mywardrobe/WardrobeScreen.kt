@@ -23,6 +23,8 @@ import com.paddysystems.mywardrobe.ui.components.SelectionActions
 import com.paddysystems.mywardrobe.ui.components.DeleteConfirmationDialog
 import com.paddysystems.mywardrobe.ui.components.AddItemButton
 import com.paddysystems.mywardrobe.ui.components.WardrobeHeader
+import com.paddysystems.mywardrobe.data.model.WardrobeItem
+import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
 
 @Composable
 fun WardrobeScreen(
@@ -36,17 +38,19 @@ fun WardrobeScreen(
         mutableStateOf("")
     }
 
-    val selectedImages = remember {
-        mutableStateListOf<File>()
+    val selectedItems = remember {
+        mutableStateListOf<WardrobeItem>()
     }
 
     var showDeleteConfirmation by remember {
         mutableStateOf(false)
     }
 
-    val images = remember {
-        mutableStateListOf<File>().apply {
-            addAll(loadImages(context))
+    val items = remember {
+        mutableStateListOf<WardrobeItem>().apply {
+            addAll(
+                loadWardrobeItems(context)
+            )
         }
     }
 
@@ -56,13 +60,13 @@ fun WardrobeScreen(
             .padding(16.dp)
     ) {
         WardrobeHeader(
-            itemCount = images.size,
-            selectedCount = selectedImages.size
+            itemCount = items.size,
+            selectedCount = selectedItems.size
         )
         SelectionActions(
-            selectedCount = selectedImages.size,
+            selectedCount = selectedItems.size,
             onCancel = {
-                selectedImages.clear()
+                selectedItems.clear()
             },
             onDelete = {
                 showDeleteConfirmation = true
@@ -87,49 +91,51 @@ fun WardrobeScreen(
         )
 
         WardrobeGrid(
-            images = images,
-            selectedImages = selectedImages,
+            items = items,
+            selectedItems = selectedItems,
             modifier = Modifier.weight(1f),
-            onImageClick = { imageFile ->
-                if (selectedImages.isNotEmpty()) {
-                    if (selectedImages.contains(imageFile)) {
-                        selectedImages.remove(imageFile)
+            onItemClick = { item ->
+                if (selectedItems.isNotEmpty()) {
+                    if (selectedItems.contains(item)) {
+                        selectedItems.remove(item)
                     } else {
-                        selectedImages.add(imageFile)
+                        selectedItems.add(item)
                     }
                 } else {
-                    onItemClick(imageFile)
+                    onItemClick(
+                        File(item.imagePath)
+                    )
                 }
             },
-            onImageLongClick = { imageFile ->
-                if (selectedImages.contains(imageFile)) {
-                    selectedImages.remove(imageFile)
+            onItemLongClick = { item ->
+                if (selectedItems.contains(item)) {
+                    selectedItems.remove(item)
                 } else {
-                    selectedImages.add(imageFile)
+                    selectedItems.add(item)
                 }
             }
         )
 
-        if (showDeleteConfirmation) {
-            DeleteConfirmationDialog(
-                selectedCount = selectedImages.size,
-                onDismiss = {
-                    showDeleteConfirmation = false
-                },
-                onConfirm = {
-                    val imagesToDelete = selectedImages.toList()
-
-                    imagesToDelete.forEach { imageFile ->
-                        if (deleteImage(imageFile)) {
-                            images.remove(imageFile)
-                        }
-                    }
-
-                    selectedImages.clear()
-                    showDeleteConfirmation = false
-                }
-            )
-        }
+//        if (showDeleteConfirmation) {
+//            DeleteConfirmationDialog(
+//                selectedCount = selectedItems.size,
+//                onDismiss = {
+//                    showDeleteConfirmation = false
+//                },
+//                onConfirm = {
+//                    val imagesToDelete = selectedItems.toList()
+//
+//                    imagesToDelete.forEach { imageFile ->
+//                        if (deleteImage(imageFile)) {
+//                            images.remove(imageFile)
+//                        }
+//                    }
+//
+//                    selectedItems.clear()
+//                    showDeleteConfirmation = false
+//                }
+//            )
+//        }
 
         AddItemButton(
             onClick = onAddItemClick

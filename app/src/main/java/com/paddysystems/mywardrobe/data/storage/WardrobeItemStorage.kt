@@ -58,3 +58,62 @@ fun saveWardrobeItem(
         null
     }
 }
+
+fun loadWardrobeItems(
+    context: Context
+): List<WardrobeItem> {
+    val itemDirectory = File(
+        context.filesDir,
+        "wardrobe_items"
+    )
+
+    if (!itemDirectory.exists()) {
+        return emptyList()
+    }
+
+    return itemDirectory
+        .listFiles()
+        ?.filter {
+            it.isFile &&
+                    it.extension == "json"
+        }
+        ?.sortedByDescending {
+            it.lastModified()
+        }
+        ?.mapNotNull { itemFile ->
+            try {
+                val json = JSONObject(
+                    itemFile.readText()
+                )
+
+                val colourArray =
+                    json.getJSONArray("colours")
+
+                val colours = List(
+                    colourArray.length()
+                ) { index ->
+                    colourArray.getString(index)
+                }
+
+                val item = WardrobeItem(
+                    id = json.getString("id"),
+                    imagePath = json.getString("imagePath"),
+                    clothingTypeId = json.getString(
+                        "clothingTypeId"
+                    ),
+                    colours = colours
+                )
+
+                if (
+                    File(item.imagePath).exists()
+                ) {
+                    item
+                } else {
+                    null
+                }
+            } catch (exception: Exception) {
+                null
+            }
+        }
+        ?: emptyList()
+}

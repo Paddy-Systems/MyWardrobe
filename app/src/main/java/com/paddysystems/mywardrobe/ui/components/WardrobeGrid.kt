@@ -20,17 +20,18 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
+import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import java.io.File
 
 @Composable
 fun WardrobeGrid(
-    images: List<File>,
-    selectedImages: List<File>,
-    onImageClick: (File) -> Unit,
-    onImageLongClick: (File) -> Unit,
+    items: List<WardrobeItem>,
+    selectedItems: List<WardrobeItem>,
+    onItemClick: (WardrobeItem) -> Unit,
+    onItemLongClick: (WardrobeItem) -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (images.isEmpty()) {
+    if (items.isEmpty()) {
         Column(
             modifier = modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.Center,
@@ -49,15 +50,20 @@ fun WardrobeGrid(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
-        items(images) { imageFile ->
-            WardrobeItem(
-                imageFile = imageFile,
-                isSelected = selectedImages.contains(imageFile),
+        items(
+            items = items,
+            key = { item ->
+                item.id
+            }
+        ) { item ->
+            WardrobeGridItem(
+                item = item,
+                isSelected = selectedItems.contains(item),
                 onClick = {
-                    onImageClick(imageFile)
+                    onItemClick(item)
                 },
                 onLongClick = {
-                    onImageLongClick(imageFile)
+                    onItemLongClick(item)
                 }
             )
         }
@@ -65,14 +71,14 @@ fun WardrobeGrid(
 }
 
 @Composable
-private fun WardrobeItem(
-    imageFile: File,
+private fun WardrobeGridItem(
+    item: WardrobeItem,
     isSelected: Boolean,
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
     AsyncImage(
-        model = imageFile,
+        model = File(item.imagePath),
         contentDescription = "Wardrobe item",
         modifier = Modifier
             .fillMaxWidth()
