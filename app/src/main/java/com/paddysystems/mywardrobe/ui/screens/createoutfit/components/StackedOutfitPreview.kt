@@ -11,7 +11,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.shadow
+import androidx.compose.foundation.clickable
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -123,56 +123,27 @@ private fun LayerStackCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    androidx.compose.material3.Surface(
+    Box(
         modifier = modifier
-            .then(
-                Modifier
-                    .fillMaxSize()
-            )
             .offset(
                 x = offsetX
             )
             .width(width)
-            .height(480.dp),
-
-        onClick =
-            onClick,
-
-        shape =
-            androidx.compose.foundation
-                .shape
-                .RoundedCornerShape(
-                    22.dp
-                ),
-
-        color =
-            MaterialTheme
-                .colorScheme
-                .surface,
-
-        shadowElevation =
-            8.dp,
-
-        tonalElevation =
-            2.dp
-    ) {
-
-        Box(
-            modifier =
-                Modifier.fillMaxSize()
-        ) {
-
-            LayerPreviewContents(
-                layer =
-                    layer,
-
-                layerNumber =
-                    layerNumber,
-
-                itemsById =
-                    itemsById
+            .height(480.dp)
+            .clickable(
+                onClick = onClick
             )
-        }
+    ) {
+        LayerPreviewContents(
+            layer =
+                layer,
+
+            layerNumber =
+                layerNumber,
+
+            itemsById =
+                itemsById
+        )
     }
 }
 
@@ -236,17 +207,18 @@ private fun LayerPreviewContents(
         )
 
         if (!hasClothing) {
+            Text(
+                text = "Empty",
 
-            OutfitSilhouette(
                 modifier = Modifier
-                    .fillMaxSize()
-                    .padding(
-                        horizontal =
-                            42.dp,
+                    .align(
+                        Alignment.Center
+                    ),
 
-                        vertical =
-                            45.dp
-                    )
+                color =
+                    MaterialTheme
+                        .colorScheme
+                        .onSurfaceVariant
             )
 
             return@Box
