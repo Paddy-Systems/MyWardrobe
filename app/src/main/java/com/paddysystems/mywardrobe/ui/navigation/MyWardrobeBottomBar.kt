@@ -2,28 +2,42 @@ package com.paddysystems.mywardrobe.ui.navigation
 
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Button
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 
 @Composable
 fun MyWardrobeBottomBar(
+    isViewingOutfits: Boolean,
     onCreateOutfit: () -> Unit,
     onAddItem: () -> Unit,
-    onViewOutfits: () -> Unit
+    onViewOutfits: () -> Unit,
+    onWardrobe: () -> Unit
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(8.dp)
+            .height(88.dp)
+            .padding(
+                horizontal = 8.dp,
+                vertical = 8.dp
+            ),
+        verticalAlignment =
+            Alignment.CenterVertically
     ) {
         Button(
-            modifier =
-                Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
 
             onClick =
                 onCreateOutfit
@@ -32,30 +46,44 @@ fun MyWardrobeBottomBar(
         }
 
         FilledIconButton(
-            modifier =
-                Modifier.padding(
+            modifier = Modifier
+                .padding(
                     horizontal = 12.dp
+                )
+                .size(72.dp)
+                .offset(
+                    y = (-6).dp
                 ),
 
             onClick =
                 onAddItem
         ) {
-            /*
-             * Temporary camera representation.
-             * We'll replace with the actual
-             * Material camera icon next.
-             */
-            Text("📷")
+            Text(
+                text = "📷",
+                fontSize = 28.sp
+            )
         }
 
         Button(
-            modifier =
-                Modifier.weight(1f),
+            modifier = Modifier
+                .weight(1f)
+                .height(48.dp),
 
-            onClick =
-                onViewOutfits
+            onClick = {
+                if (isViewingOutfits) {
+                    onWardrobe()
+                } else {
+                    onViewOutfits()
+                }
+            }
         ) {
-            Text("View Outfits")
+            Text(
+                if (isViewingOutfits) {
+                    "Wardrobe"
+                } else {
+                    "View Outfits"
+                }
+            )
         }
     }
 }

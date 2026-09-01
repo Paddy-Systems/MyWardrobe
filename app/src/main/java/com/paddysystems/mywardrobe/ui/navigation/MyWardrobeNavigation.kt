@@ -13,7 +13,8 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.foundation.layout.padding
 import com.paddysystems.mywardrobe.ui.screens.createoutfit.CreateOutfitScreen
 import com.paddysystems.mywardrobe.ui.screens.outfits.OutfitsScreen
-
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.compose.runtime.getValue
 
 
 private object Routes {
@@ -55,11 +56,27 @@ fun MyWardrobeNavigation(
     val navController =
         rememberNavController()
 
+    val backStackEntry by
+    navController
+        .currentBackStackEntryAsState()
+
+    val currentRoute =
+        backStackEntry
+            ?.destination
+            ?.route
+
+    val isViewingOutfits =
+        currentRoute ==
+                Routes.OUTFITS
+
     Scaffold(
         modifier = modifier,
 
         bottomBar = {
             MyWardrobeBottomBar(
+                isViewingOutfits =
+                    isViewingOutfits,
+
                 onCreateOutfit = {
                     navController.navigate(
                         Routes.CREATE_OUTFIT
@@ -80,6 +97,13 @@ fun MyWardrobeNavigation(
                     ) {
                         launchSingleTop = true
                     }
+                },
+
+                onWardrobe = {
+                    navController.popBackStack(
+                        route = Routes.WARDROBE,
+                        inclusive = false
+                    )
                 }
             )
         }
