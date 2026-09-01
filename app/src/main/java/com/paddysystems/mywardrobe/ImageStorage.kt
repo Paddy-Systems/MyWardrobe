@@ -4,6 +4,7 @@ import android.content.Context
 import android.net.Uri
 import java.io.File
 import java.util.UUID
+import androidx.core.content.FileProvider
 
 fun saveImage(context: Context, uri: Uri): File? {
     val imageDirectory = File(
@@ -52,4 +53,25 @@ fun loadImages(context: Context): List<File> {
 
 fun deleteImage(imageFile: File): Boolean {
     return imageFile.delete()
+}
+
+fun createCameraImageUri(context: Context): Uri {
+    val imageDirectory = File(
+        context.cacheDir,
+        "camera_images"
+    )
+
+    imageDirectory.mkdirs()
+
+    val imageFile = File.createTempFile(
+        "wardrobe_",
+        ".jpg",
+        imageDirectory
+    )
+
+    return FileProvider.getUriForFile(
+        context,
+        "${context.packageName}.fileprovider",
+        imageFile
+    )
 }
