@@ -1,6 +1,8 @@
 package com.paddysystems.mywardrobe.ui.screens.createoutfit.components
 
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -9,68 +11,46 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun SaveOutfitDialog(
     suggestedName: String,
     onSave: (String) -> Unit,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    title: String = "Name this look",
+    confirmText: String = "Save"
 ) {
-    var name by remember(
-        suggestedName
-    ) {
-        mutableStateOf(
-            suggestedName
-        )
+    var name by remember(suggestedName) {
+        mutableStateOf(suggestedName)
     }
 
     AlertDialog(
-        onDismissRequest =
-            onDismiss,
-
+        onDismissRequest = onDismiss,
         title = {
-            Text("Name this look", style = MaterialTheme.typography.headlineMedium)
+            Text(
+                title,
+                style = MaterialTheme.typography.headlineMedium
+            )
         },
-
         text = {
             OutlinedTextField(
                 value = name,
-
-                onValueChange = {
-                    name = it
-                },
-
-                label = {
-                    Text("Outfit name")
-                },
-
+                onValueChange = { name = it },
+                label = { Text("Outfit name") },
                 singleLine = true
             )
         },
-
         confirmButton = {
             TextButton(
-                enabled =
-                    name.isNotBlank(),
-
-                onClick = {
-                    onSave(
-                        name.trim()
-                    )
-                }
+                enabled = name.isNotBlank(),
+                onClick = { onSave(name.trim()) }
             ) {
-                Text("Save")
+                Text(confirmText)
             }
         },
-
         dismissButton = {
-            TextButton(
-                onClick =
-                    onDismiss
-            ) {
+            TextButton(onClick = onDismiss) {
                 Text("Cancel")
             }
         },

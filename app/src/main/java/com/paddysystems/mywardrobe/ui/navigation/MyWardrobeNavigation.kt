@@ -28,10 +28,12 @@ private object Routes {
     const val CREATE_OUTFIT = "create-outfit"
     const val OUTFITS = "outfits"
     const val OUTFIT_DETAILS = "outfit-details/{outfitId}"
+    const val EDIT_OUTFIT = "edit-outfit/{outfitId}"
 
     fun itemDetails(itemId: String): String = "item-details/$itemId"
     fun editItem(itemId: String): String = "edit-item/$itemId"
     fun outfitDetails(outfitId: String): String = "outfit-details/$outfitId"
+    fun editOutfit(outfitId: String): String = "edit-outfit/$outfitId"
 }
 
 @Composable
@@ -51,7 +53,8 @@ fun MyWardrobeNavigation(
         Routes.ADD_ITEM -> MyWardrobeDestination.ADD
         Routes.OUTFITS,
         Routes.CREATE_OUTFIT,
-        Routes.OUTFIT_DETAILS -> MyWardrobeDestination.OUTFITS
+        Routes.OUTFIT_DETAILS,
+        Routes.EDIT_OUTFIT -> MyWardrobeDestination.OUTFITS
         else -> MyWardrobeDestination.WARDROBE
     }
 
@@ -123,13 +126,34 @@ fun MyWardrobeNavigation(
 
                 OutfitDetailsScreen(
                     outfitId = outfitId,
+                    refreshKey = outfitsRefreshKey,
                     onBack = {
                         navController.popBackStack()
+                    },
+                    onEdit = {
+                        navController.navigate(Routes.editOutfit(outfitId))
                     },
                     onChanged = {
                         outfitsRefreshKey++
                     },
                     onDeleted = {
+                        outfitsRefreshKey++
+                        navController.popBackStack()
+                    }
+                )
+            }
+
+            composable(Routes.EDIT_OUTFIT) { entry ->
+                val outfitId = entry.arguments
+                    ?.getString("outfitId")
+                    ?: return@composable
+
+                CreateOutfitScreen(
+                    outfitId = outfitId,
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onSaved = {
                         outfitsRefreshKey++
                         navController.popBackStack()
                     }

@@ -46,17 +46,20 @@ import kotlinx.coroutines.withContext
 @Composable
 fun OutfitDetailsScreen(
     outfitId: String,
+    refreshKey: Int = 0,
     onBack: () -> Unit,
+    onEdit: () -> Unit,
     onChanged: () -> Unit,
     onDeleted: () -> Unit
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
 
-    var outfit by remember(outfitId) {
+    var outfit by remember(outfitId, refreshKey) {
         mutableStateOf(loadOutfit(context, outfitId))
     }
-    val wardrobeItems = remember {
+
+    val wardrobeItems = remember(refreshKey) {
         loadWardrobeItems(context)
     }
 
@@ -100,7 +103,7 @@ fun OutfitDetailsScreen(
             navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
             onNavigate = onBack,
             actionIcon = Icons.Outlined.Edit,
-            onAction = { showRenameDialog = true },
+            onAction = onEdit,
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 
@@ -212,6 +215,18 @@ fun OutfitDetailsScreen(
         )
 
         Spacer(Modifier.height(30.dp))
+
+        EditorialSecondaryButton(
+            text = "Rename look",
+            icon = Icons.Outlined.Edit,
+            enabled = !isWorking,
+            onClick = { showRenameDialog = true },
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 20.dp)
+        )
+
+        Spacer(Modifier.height(10.dp))
 
         EditorialDangerButton(
             text = "Delete outfit",
