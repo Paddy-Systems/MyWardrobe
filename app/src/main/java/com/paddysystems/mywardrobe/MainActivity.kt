@@ -23,16 +23,24 @@ import androidx.activity.result.PickVisualMediaRequest
 import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 
 import android.net.Uri
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 
 import coil3.compose.AsyncImage
-import androidx.compose.foundation.layout.size
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.layout.aspectRatio
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.PaddingValues
+
+import android.content.Context
+import androidx.compose.ui.platform.LocalContext
+import java.io.File
+import java.util.UUID
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -52,15 +60,22 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WardrobeScreen(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
     val images = remember {
-        mutableStateListOf<Uri>()
+        mutableStateListOf<File>().apply {
+            addAll(loadImages(context))
+        }
     }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = PickVisualMedia()
     ) { uri ->
         if (uri != null) {
-            images.add(uri)
+            val savedImage = saveImage(context, uri)
+
+            if (savedImage != null) {
+                images.add(savedImage)
+            }
         }
     }
 
@@ -74,13 +89,23 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
             Text("No items yet")
         }
 
-        images.forEach { imageUri ->
-            AsyncImage(
-                model = imageUri,
-                contentDescription = "Wardrobe item",
-                modifier = Modifier.size(100.dp),
-                contentScale = ContentScale.Crop
-            )
+        LazyVerticalGrid(
+            columns = GridCells.Fixed(3),
+            modifier = Modifier
+                .fillMaxWidth()
+                .weight(1f),
+            contentPadding = PaddingValues(8.dp)
+        ) {
+            items(images) { imageFile ->
+                AsyncImage(
+                    model = imageFile,
+                    contentDescription = "Wardrobe item",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(1f),
+                    contentScale = ContentScale.Crop
+                )
+            }
         }
 
         Button(
@@ -95,6 +120,51 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
             Text("Add item")
         }
     }
+}
+
+fun saveImage(context: Context, uri: Uri): File? {
+    val imageDirectory = File(
+        context.filesDir,
+        "wardrobe_images"
+    )
+
+    imageDirectory.mkdirs()
+
+    val imageFile = File(
+        imageDirectory,
+        "${UUID.randomUUID()}.jpg"
+    )
+
+    return try {
+        context.contentResolver
+            .openInputStream(uri)
+            ?.use { input ->
+                imageFile.outputStream().use { output ->
+                    input.copyTo(output)
+                }
+            }
+
+        imageFile
+    } catch (exception: Exception) {
+        null
+    }
+}
+
+fun loadImages(context: Context): List<File> {
+    val imageDirectory = File(
+        context.filesDir,
+        "wardrobe_images"
+    )
+
+    if (!imageDirectory.exists()) {
+        return emptyList()
+    }
+
+    return imageDirectory
+        .listFiles()
+        ?.filter { it.isFile }
+        ?.sortedByDescending { it.lastModified() }
+        ?: emptyList()
 }
 
 @Preview(showBackground = true)
