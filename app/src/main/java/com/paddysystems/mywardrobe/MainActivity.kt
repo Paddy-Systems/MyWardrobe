@@ -16,7 +16,8 @@ import com.paddysystems.mywardrobe.ui.theme.MyWardrobeTheme
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.ui.Alignment
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.draw.clip
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.PickVisualMediaRequest
@@ -36,11 +37,18 @@ import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.ui.Alignment
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
 
 import android.content.Context
+import androidx.compose.material3.ButtonColors
 import androidx.compose.ui.platform.LocalContext
 import java.io.File
 import java.util.UUID
+
+import androidx.compose.material3.MaterialTheme
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -80,35 +88,92 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
     }
 
     Column(
-        modifier = modifier.fillMaxSize(),
-        verticalArrangement = Arrangement.Center,
-        horizontalAlignment = Alignment.CenterHorizontally
+        modifier = modifier
+            .fillMaxSize()
+            .padding(16.dp)
     ) {
-        Text("My Wardrobe")
-        if (images.isEmpty()) {
-            Text("No items yet")
+        Text(
+            text = "My Wardrobe · ${images.size} items",
+            style = MaterialTheme.typography.headlineLarge
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Button(
+//                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    //
+                }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Search")
+                }
+            }
+            Button(
+//                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    //
+                }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Filter")
+                }
+            }
+            Button(
+//                modifier = Modifier.fillMaxWidth(),
+                onClick = {
+                    //
+                }
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text("Sort")
+                }
+            }
         }
 
-        LazyVerticalGrid(
-            columns = GridCells.Fixed(3),
-            modifier = Modifier
-                .fillMaxWidth()
-                .weight(1f),
-            contentPadding = PaddingValues(8.dp)
-        ) {
-            items(images) { imageFile ->
-                AsyncImage(
-                    model = imageFile,
-                    contentDescription = "Wardrobe item",
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .aspectRatio(1f),
-                    contentScale = ContentScale.Crop
-                )
+        if (images.isEmpty()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                verticalArrangement = Arrangement.Center,
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text("No items yet")
+            }
+        } else {
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(3),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .weight(1f),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                items(images) { imageFile ->
+                    AsyncImage(
+                        model = imageFile,
+                        contentDescription = "Wardrobe item",
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .aspectRatio(1f)
+                            .clip(RoundedCornerShape(12.dp)),
+                        contentScale = ContentScale.Crop
+                    )
+                }
             }
         }
 
         Button(
+            modifier = Modifier.fillMaxWidth(),
             onClick = {
                 imagePicker.launch(
                     PickVisualMediaRequest(
@@ -117,7 +182,13 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
                 )
             }
         ) {
-            Text("Add item")
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text("+")
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Add item")
+            }
         }
     }
 }
