@@ -1,7 +1,6 @@
 package com.paddysystems.mywardrobe.ui.components
 
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 
@@ -12,28 +11,15 @@ fun WardrobeHeader(
     selectedCount: Int,
     modifier: Modifier = Modifier
 ) {
-    val text =
-        if (selectedCount > 0) {
-            "$selectedCount selected"
-        } else if (
-            itemCount == totalItemCount
-        ) {
-            "My Wardrobe · " +
-                    "$totalItemCount " +
-                    itemWord(totalItemCount)
-        } else {
-            "My Wardrobe · " +
-                    "$itemCount of " +
-                    "$totalItemCount " +
-                    itemWord(totalItemCount)
-        }
-
-    Text(
-        text = text,
-        style =
-            MaterialTheme
-                .typography
-                .headlineLarge,
+    val subtitle = if (itemCount == totalItemCount) {
+        "$totalItemCount ${itemWord(totalItemCount)}, ready to style"
+    } else {
+        "$itemCount of $totalItemCount ${itemWord(totalItemCount)} shown"
+    }
+    EditorialPageHeader(
+        eyebrow = if (selectedCount > 0) "Editing wardrobe" else "Your collection",
+        title = if (selectedCount > 0) "$selectedCount selected" else "My Wardrobe",
+        subtitle = if (selectedCount > 0) "Choose what to do with these pieces" else subtitle,
         modifier = modifier
     )
 }

@@ -9,11 +9,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.FilledTonalIconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.ChevronLeft
+import androidx.compose.material.icons.rounded.ChevronRight
+import androidx.compose.material.icons.outlined.Lock
+import androidx.compose.material.icons.outlined.LockOpen
+import androidx.compose.material.icons.outlined.Search
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
 
 @Composable
@@ -68,10 +74,7 @@ fun OutfitSlotOverlay(
             enabled = hasItems,
             onClick = onPrevious
         ) {
-            Text(
-                text = "‹",
-                fontSize = 30.sp
-            )
+            Icon(Icons.Rounded.ChevronLeft, contentDescription = "Previous")
         }
 
         FilledTonalIconButton(
@@ -83,10 +86,7 @@ fun OutfitSlotOverlay(
             enabled = hasItems,
             onClick = onNext
         ) {
-            Text(
-                text = "›",
-                fontSize = 30.sp
-            )
+            Icon(Icons.Rounded.ChevronRight, contentDescription = "Next")
         }
 
         Row(
@@ -110,15 +110,7 @@ fun OutfitSlotOverlay(
                 onClick =
                     onToggleLock
             ) {
-                Text(
-                    text =
-                        if (isLocked) {
-                            "🔒"
-                        } else {
-                            "🔓"
-                        },
-                    fontSize = 16.sp
-                )
+                Icon(if (isLocked) Icons.Outlined.Lock else Icons.Outlined.LockOpen, contentDescription = "Lock item")
             }
 
             FilledTonalIconButton(
@@ -129,10 +121,7 @@ fun OutfitSlotOverlay(
                 onClick =
                     onSearch
             ) {
-                Text(
-                    text = "🔍",
-                    fontSize = 16.sp
-                )
+                Icon(Icons.Outlined.Search, contentDescription = "Choose item")
             }
         }
     }

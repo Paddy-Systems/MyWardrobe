@@ -12,6 +12,19 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material.icons.outlined.PhotoLibrary
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Button
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
@@ -45,6 +58,9 @@ import com.paddysystems.mywardrobe.data.model.WardrobeMetadata
 import com.paddysystems.mywardrobe.ml.FashionAnalysisResult
 import com.paddysystems.mywardrobe.ml.SemanticMetadataAnalyzer
 import com.paddysystems.mywardrobe.data.storage.WardrobeCutoutService
+import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
+import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
+import com.paddysystems.mywardrobe.ui.components.EditorialSecondaryButton
 @Composable
 fun AddItemScreen(
     onBack: () -> Unit
@@ -67,6 +83,8 @@ fun AddItemScreen(
     var isSaving by remember {
         mutableStateOf(false)
     }
+
+    var analysisFailed by remember { mutableStateOf(false) }
 
     val galleryPicker = rememberLauncherForActivityResult(
         contract = PickVisualMedia()
@@ -107,10 +125,30 @@ fun AddItemScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp),
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 22.dp),
         verticalArrangement = Arrangement.Top
     ) {
-        Text("Add Item")
+        EditorialPageHeader(
+            eyebrow = when (currentStep) {
+                AddItemStep.IMAGE -> "A new piece"
+                AddItemStep.ANALYSING -> "Smart wardrobe"
+                AddItemStep.DETAILS -> "Review & refine"
+            },
+            title = when (currentStep) {
+                AddItemStep.IMAGE -> "Add to wardrobe"
+                AddItemStep.ANALYSING -> "Reading your piece"
+                AddItemStep.DETAILS -> "The finishing touches"
+            },
+            subtitle = when (currentStep) {
+                AddItemStep.IMAGE -> "Choose a clear, well-lit photo. We’ll take care of the details."
+                AddItemStep.ANALYSING -> "Identifying the garment, colour and best ways to style it."
+                AddItemStep.DETAILS -> "Check our suggestions before saving it to your collection."
+            },
+            navigationIcon = Icons.Outlined.ArrowBack,
+            onNavigate = onBack
+        )
 
         Spacer(
             modifier = Modifier.height(24.dp)
@@ -119,7 +157,21 @@ fun AddItemScreen(
         when (currentStep) {
 
             AddItemStep.IMAGE -> {
-                Button(
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(26.dp),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(modifier = Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        Icon(Icons.Outlined.AutoAwesome, null, tint = MaterialTheme.colorScheme.secondary)
+                        Text("Start with a photo", style = MaterialTheme.typography.titleLarge)
+                        Text("A simple front-facing shot works best.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    }
+                }
+                Spacer(Modifier.height(18.dp))
+                EditorialPrimaryButton(
+                    text = "Choose from photos",
+                    icon = Icons.Outlined.PhotoLibrary,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         galleryPicker.launch(
@@ -128,15 +180,15 @@ fun AddItemScreen(
                             )
                         )
                     }
-                ) {
-                    Text("Choose photo")
-                }
+                )
 
                 Spacer(
                     modifier = Modifier.height(12.dp)
                 )
 
-                OutlinedButton(
+                EditorialSecondaryButton(
+                    text = "Take a photo",
+                    icon = Icons.Outlined.PhotoCamera,
                     modifier = Modifier.fillMaxWidth(),
                     onClick = {
                         val uri = createCameraImageUri(context)
@@ -144,9 +196,7 @@ fun AddItemScreen(
                         pendingCameraUri = uri
                         cameraLauncher.launch(uri)
                     }
-                ) {
-                    Text("Take photo")
-                }
+                )
             }
 
             AddItemStep.ANALYSING -> {
@@ -292,12 +342,29 @@ fun AddItemScreen(
                             "Inference failed",
                             exception
                         )
+                        analysisFailed = true
                     }
                 }
 
-                Column {
-                    Text("Analysing item...")
-                    Text("Loading FashionSigLIP...")
+                Surface(
+                    modifier = Modifier.fillMaxWidth(),
+                    shape = RoundedCornerShape(26.dp),
+                    color = MaterialTheme.colorScheme.surface
+                ) {
+                    Column(
+                        modifier = Modifier.padding(28.dp),
+                        verticalArrangement = Arrangement.spacedBy(14.dp)
+                    ) {
+                        if (analysisFailed) {
+                            Text("We couldn’t read that photo", style = MaterialTheme.typography.titleLarge)
+                            Text("Try another image with the garment fully visible.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                            EditorialSecondaryButton("Choose another", onClick = { currentStep = AddItemStep.IMAGE; analysisFailed = false })
+                        } else {
+                            CircularProgressIndicator(color = MaterialTheme.colorScheme.secondary)
+                            Text("Analysing colour and cut…", style = MaterialTheme.typography.titleLarge)
+                            Text("This usually takes a moment.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                        }
+                    }
                 }
             }
 
@@ -313,7 +380,7 @@ fun AddItemScreen(
                         )
                     }
 
-                    Text("Item details")
+                    Text("Item details", style = MaterialTheme.typography.titleLarge)
 
                     Spacer(
                         modifier = Modifier.height(8.dp)
@@ -341,7 +408,8 @@ fun AddItemScreen(
                         modifier = Modifier.height(16.dp)
                     )
 
-                    Button(
+                    EditorialPrimaryButton(
+                        text = if (isSaving) "Preparing cut-out…" else "Save to wardrobe",
                         modifier = Modifier.fillMaxWidth(),
                         enabled =
                             !isSaving &&
@@ -349,18 +417,18 @@ fun AddItemScreen(
                                     predictedClothingTypeId != null &&
                                     predictedColours.isNotEmpty() &&
                                     imageEmbedding != null,
-                        onClick = {
+                        onClick = saveItem@ {
                             val imageUri =
                                 selectedImageUri
-                                    ?: return@Button
+                                    ?: return@saveItem
 
                             val clothingTypeId =
                                 predictedClothingTypeId
-                                    ?: return@Button
+                                    ?: return@saveItem
 
                             val embedding =
                                 imageEmbedding
-                                    ?: return@Button
+                                    ?: return@saveItem
 
                             isSaving = true
 
@@ -434,34 +502,9 @@ fun AddItemScreen(
                                 }
                             }
                         }
-                    ) {
-                        Text(
-                            if (isSaving) {
-                                "Preparing cut-out..."
-                            } else {
-                                "Save item"
-                            }
-                        )
-                    }
+                    )
                 }
             }
-        }
-
-        Spacer(
-            modifier = Modifier.height(24.dp)
-        )
-
-        OutlinedButton(
-            modifier =
-                Modifier.fillMaxWidth(),
-
-            enabled =
-                !isSaving,
-
-            onClick =
-                onBack
-        ) {
-            Text("Back")
         }
     }
 }

@@ -30,6 +30,16 @@ import com.paddysystems.mywardrobe.data.storage.updateWardrobeItem
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.background
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Check
+import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
+import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 
 @Composable
 fun EditItemScreen(
@@ -83,25 +93,30 @@ fun EditItemScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .verticalScroll(rememberScrollState())
+            .padding(horizontal = 20.dp, vertical = 22.dp)
     ) {
-        Text("Edit Item")
+        EditorialPageHeader(
+            eyebrow = "Wardrobe piece",
+            title = "Edit details",
+            subtitle = "Keep the information that makes outfit suggestions useful.",
+            navigationIcon = Icons.Outlined.ArrowBack,
+            onNavigate = onBack
+        )
 
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
-        AsyncImage(
-            model = File(item.imagePath),
-            contentDescription = "Wardrobe item",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(260.dp)
-                .clip(
-                    RoundedCornerShape(16.dp)
-                )
-        )
+        Surface(shape = RoundedCornerShape(26.dp), color = MaterialTheme.colorScheme.surface) {
+            AsyncImage(
+                model = item.cutoutPath?.let(::File)?.takeIf(File::exists) ?: File(item.imagePath),
+                contentDescription = "Wardrobe item",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxWidth().height(280.dp).padding(18.dp)
+            )
+        }
 
         Spacer(
             modifier = Modifier.height(16.dp)
@@ -129,7 +144,9 @@ fun EditItemScreen(
             modifier = Modifier.height(24.dp)
         )
 
-        Button(
+        EditorialPrimaryButton(
+            text = "Save changes",
+            icon = Icons.Outlined.Check,
             modifier = Modifier.fillMaxWidth(),
             enabled = selectedColours.isNotEmpty(),
             onClick = {
@@ -151,19 +168,6 @@ fun EditItemScreen(
                     }
                 }
             }
-        ) {
-            Text("Save changes")
-        }
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
         )
-
-        Button(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onBack
-        ) {
-            Text("Back")
-        }
     }
 }

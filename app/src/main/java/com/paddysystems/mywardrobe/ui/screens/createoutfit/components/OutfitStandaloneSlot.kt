@@ -53,10 +53,7 @@ fun OutfitStandaloneSlot(
             color =
                 MaterialTheme
                     .colorScheme
-                    .surfaceVariant
-                    .copy(
-                        alpha = 0.35f
-                    )
+                    .surface
         ) {
             OutfitSlotOverlay(
                 item = item,

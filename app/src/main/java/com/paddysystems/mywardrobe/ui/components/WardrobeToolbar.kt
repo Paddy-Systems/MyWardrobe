@@ -4,8 +4,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Close
+import androidx.compose.material.icons.outlined.Search
+import androidx.compose.material.icons.outlined.Sort
+import androidx.compose.material.icons.outlined.Tune
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.OutlinedTextFieldDefaults
@@ -15,6 +19,9 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.OutlinedButton
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxWidth
 
 @Composable
 fun WardrobeToolbar(
@@ -27,10 +34,9 @@ fun WardrobeToolbar(
     onSortClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    Row(
+    Column(
         modifier = modifier,
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(8.dp)
+        verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         OutlinedTextField(
             value = searchQuery,
@@ -39,7 +45,7 @@ fun WardrobeToolbar(
                 Text("Search")
             },
             modifier = Modifier
-                .weight(1f)
+                .fillMaxWidth()
                 .height(56.dp),
             singleLine = true,
             shape = RoundedCornerShape(14.dp),
@@ -52,54 +58,20 @@ fun WardrobeToolbar(
                     IconButton(
                         onClick = onClearSearch
                     ) {
-                        Text(
-                            text = "×",
-                            style =
-                                MaterialTheme
-                                    .typography
-                                    .titleLarge
-                        )
+                        Icon(Icons.Outlined.Close, contentDescription = "Clear search")
                     }
-                }
+                } else Icon(Icons.Outlined.Search, contentDescription = null)
             },
         )
-
-        Button(
-            modifier = Modifier.height(56.dp),
-            onClick = onFilterClick,
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        ) {
-            Text(
-                if (
-                    activeFilterCount > 0
-                ) {
-                    "Filter ($activeFilterCount)"
-                } else {
-                    "Filter"
-                }
-            )
-        }
-
-        Button(
-            modifier = Modifier.height(56.dp),
-            onClick = onSortClick,
-            shape = RoundedCornerShape(14.dp),
-            colors = ButtonDefaults.buttonColors(
-                containerColor = MaterialTheme.colorScheme.secondaryContainer,
-                contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-            )
-        ) {
-            Text(
-                if (sortIsActive) {
-                    "Sort ✓"
-                } else {
-                    "Sort"
-                }
-            )
+        Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+            OutlinedButton(modifier = Modifier.weight(1f), onClick = onFilterClick) {
+                Icon(Icons.Outlined.Tune, null)
+                Text(if (activeFilterCount > 0) "  Filter · $activeFilterCount" else "  Filter")
+            }
+            OutlinedButton(modifier = Modifier.weight(1f), onClick = onSortClick) {
+                Icon(Icons.Outlined.Sort, null)
+                Text(if (sortIsActive) "  Sorted" else "  Sort")
+            }
         }
     }
 }

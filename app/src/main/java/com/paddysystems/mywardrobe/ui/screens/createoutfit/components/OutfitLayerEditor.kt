@@ -75,13 +75,13 @@ fun OutfitLayerEditor(
         modifier = modifier
     ) {
         Text(
-            text =
-                "Layer $layerNumber of $layerCount",
+            text = "LAYER $layerNumber OF $layerCount",
 
             style =
                 MaterialTheme
                     .typography
-                    .titleLarge
+                    .labelSmall,
+            color = MaterialTheme.colorScheme.primary
         )
 
         Spacer(
@@ -181,10 +181,7 @@ fun OutfitLayerEditor(
             color =
                 MaterialTheme
                     .colorScheme
-                    .surfaceVariant
-                    .copy(
-                        alpha = 0.45f
-                    )
+                    .surface
         ) {
             Box(
                 modifier =

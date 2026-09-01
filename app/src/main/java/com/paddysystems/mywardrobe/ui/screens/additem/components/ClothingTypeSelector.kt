@@ -17,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import com.paddysystems.mywardrobe.data.model.defaultClothingTypes
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.foundation.shape.RoundedCornerShape
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -57,7 +58,8 @@ fun ClothingTypeSelector(
                 .menuAnchor(
                     ExposedDropdownMenuAnchorType.PrimaryNotEditable
                 )
-                .fillMaxWidth()
+                .fillMaxWidth(),
+            shape = RoundedCornerShape(16.dp)
         )
 
         ExposedDropdownMenu(

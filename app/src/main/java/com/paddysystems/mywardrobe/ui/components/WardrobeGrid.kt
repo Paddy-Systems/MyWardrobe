@@ -7,12 +7,18 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Icon
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,9 +54,9 @@ fun WardrobeGrid(
     LazyVerticalGrid(
         columns = GridCells.Fixed(3),
         modifier = modifier.fillMaxWidth(),
-        contentPadding = PaddingValues(8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalArrangement = Arrangement.spacedBy(8.dp)
+        contentPadding = PaddingValues(vertical = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(10.dp),
+        verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         items(
             items = items,
@@ -79,19 +85,17 @@ private fun WardrobeGridItem(
     onClick: () -> Unit,
     onLongClick: () -> Unit
 ) {
-    AsyncImage(
-        model = File(item.imagePath),
-        contentDescription = "Wardrobe item",
+    val imageFile = item.cutoutPath?.let(::File)?.takeIf(File::exists) ?: File(item.imagePath)
+    Surface(
         modifier = Modifier
             .fillMaxWidth()
             .aspectRatio(1f)
-            .clip(RoundedCornerShape(12.dp))
             .then(
                 if (isSelected) {
                     Modifier.border(
                         width = 3.dp,
                         color = MaterialTheme.colorScheme.primary,
-                        shape = RoundedCornerShape(12.dp)
+                        shape = RoundedCornerShape(18.dp)
                     )
                 } else {
                     Modifier
@@ -101,6 +105,24 @@ private fun WardrobeGridItem(
                 onClick = onClick,
                 onLongClick = onLongClick
             ),
-        contentScale = ContentScale.Crop
-    )
+        shape = RoundedCornerShape(18.dp),
+        color = MaterialTheme.colorScheme.surface,
+        shadowElevation = if (isSelected) 0.dp else 1.dp
+    ) {
+        Box {
+            AsyncImage(
+                model = imageFile,
+                contentDescription = "Wardrobe item",
+                modifier = Modifier.fillMaxWidth().padding(10.dp),
+                contentScale = ContentScale.Fit
+            )
+            if (isSelected) {
+                Surface(
+                    modifier = Modifier.align(Alignment.TopEnd).padding(8.dp),
+                    shape = RoundedCornerShape(50),
+                    color = MaterialTheme.colorScheme.primary
+                ) { Icon(Icons.Rounded.Check, null, tint = MaterialTheme.colorScheme.onPrimary, modifier = Modifier.padding(4.dp)) }
+            }
+        }
+    }
 }

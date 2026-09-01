@@ -73,34 +73,18 @@ fun MyWardrobeNavigation(
             ?.destination
             ?.route
 
-    val showWardrobeOnRight =
-        currentRoute ==
-                Routes.OUTFITS
-
-    val showWardrobeOnLeft =
-        currentRoute !=
-                Routes.WARDROBE &&
-                currentRoute !=
-                Routes.OUTFITS
+    val selectedDestination = when (currentRoute) {
+        Routes.ADD_ITEM -> MyWardrobeDestination.ADD
+        Routes.OUTFITS, Routes.CREATE_OUTFIT -> MyWardrobeDestination.OUTFITS
+        else -> MyWardrobeDestination.WARDROBE
+    }
 
     Scaffold(
         modifier = modifier,
 
         bottomBar = {
             MyWardrobeBottomBar(
-                showWardrobeOnLeft =
-                    showWardrobeOnLeft,
-
-                showWardrobeOnRight =
-                    showWardrobeOnRight,
-
-                onCreateOutfit = {
-                    navController.navigate(
-                        Routes.CREATE_OUTFIT
-                    ) {
-                        launchSingleTop = true
-                    }
-                },
+                selectedDestination = selectedDestination,
 
                 onAddItem = {
                     navController.navigate(
@@ -109,9 +93,7 @@ fun MyWardrobeNavigation(
                 },
 
                 onViewOutfits = {
-                    navController.navigate(
-                        Routes.OUTFITS
-                    ) {
+                    navController.navigate(Routes.OUTFITS) {
                         launchSingleTop = true
                     }
                 },
@@ -181,7 +163,10 @@ fun MyWardrobeNavigation(
             ) {
                 OutfitsScreen(
                     refreshKey =
-                        outfitsRefreshKey
+                        outfitsRefreshKey,
+                    onCreateOutfit = {
+                        navController.navigate(Routes.CREATE_OUTFIT)
+                    }
                 )
             }
 
