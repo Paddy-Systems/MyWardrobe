@@ -56,16 +56,17 @@ fun AddItemScreen(
     ) { uri ->
         if (uri != null) {
             selectedImageUri = uri
-            currentStep = AddItemStep.SHAPE
+            currentStep = AddItemStep.ANALYSING
         }
     }
+
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = TakePicture()
     ) { success ->
         if (success) {
             selectedImageUri = pendingCameraUri
-            currentStep = AddItemStep.SHAPE
+            currentStep = AddItemStep.ANALYSING
         }
     }
 
@@ -114,20 +115,10 @@ fun AddItemScreen(
                 }
             }
 
-            AddItemStep.SHAPE -> {
-                selectedImageUri?.let { imageUri ->
-                    ItemShapeStep(
-                        imageUri = imageUri,
-                        onShapeSelected = { selectedCropType ->
-                            cropType = selectedCropType
-                            currentStep = AddItemStep.CROP
-                        },
-                        onChooseAnotherPhoto = {
-                            selectedImageUri = null
-                            cropType = null
-                            currentStep = AddItemStep.IMAGE
-                        }
-                    )
+            AddItemStep.ANALYSING -> {
+                Column {
+                    Text("Analysing item...")
+                    Text("Detecting clothing type and colours")
                 }
             }
 
