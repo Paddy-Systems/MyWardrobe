@@ -29,7 +29,9 @@ fun WardrobeGrid(
     selectedItems: List<WardrobeItem>,
     onItemClick: (WardrobeItem) -> Unit,
     onItemLongClick: (WardrobeItem) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    emptyMessage: String =
+        "No items yet"
 ) {
     if (items.isEmpty()) {
         Column(
@@ -37,7 +39,7 @@ fun WardrobeGrid(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text("No items yet")
+            Text(emptyMessage)
         }
 
         return

@@ -26,6 +26,7 @@ import com.paddysystems.mywardrobe.ui.components.WardrobeHeader
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
 import com.paddysystems.mywardrobe.data.storage.deleteWardrobeItem
+import com.paddysystems.mywardrobe.search.WardrobeSearchEngine
 
 @Composable
 fun WardrobeScreen(
@@ -55,14 +56,31 @@ fun WardrobeScreen(
         }
     }
 
+    val visibleItems =
+        if (
+            searchQuery.isBlank()
+        ) {
+            items.toList()
+        } else {
+            WardrobeSearchEngine
+                .search(
+                    items = items,
+                    query = searchQuery
+                )
+                .map {
+                    it.item
+                }
+        }
+
     Column(
         modifier = modifier
             .fillMaxSize()
             .padding(16.dp)
     ) {
         WardrobeHeader(
-            itemCount = items.size,
-            selectedCount = selectedItems.size
+            itemCount = visibleItems.size,
+            selectedCount =
+                selectedItems.size
         )
         SelectionActions(
             selectedCount = selectedItems.size,
@@ -78,7 +96,11 @@ fun WardrobeScreen(
         )
         WardrobeToolbar(
             searchQuery = searchQuery,
-            onSearchQueryChange = { searchQuery = it },
+            onSearchQueryChange = { query ->
+                searchQuery = query
+
+                selectedItems.clear()
+            },
             onFilterClick = {
                 //
             },
@@ -92,12 +114,29 @@ fun WardrobeScreen(
         )
 
         WardrobeGrid(
-            items = items,
+            items = visibleItems,
             selectedItems = selectedItems,
+
+            emptyMessage =
+                if (
+                    searchQuery.isBlank()
+                ) {
+                    "No items yet"
+                } else {
+                    "No matching items"
+                },
+
             modifier = Modifier.weight(1f),
+
             onItemClick = { item ->
-                if (selectedItems.isNotEmpty()) {
-                    if (selectedItems.contains(item)) {
+                if (
+                    selectedItems.isNotEmpty()
+                ) {
+                    if (
+                        selectedItems.contains(
+                            item
+                        )
+                    ) {
                         selectedItems.remove(item)
                     } else {
                         selectedItems.add(item)
@@ -106,8 +145,11 @@ fun WardrobeScreen(
                     onItemClick(item)
                 }
             },
+
             onItemLongClick = { item ->
-                if (selectedItems.contains(item)) {
+                if (
+                    selectedItems.contains(item)
+                ) {
                     selectedItems.remove(item)
                 } else {
                     selectedItems.add(item)
