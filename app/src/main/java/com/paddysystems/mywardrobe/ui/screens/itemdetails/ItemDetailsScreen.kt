@@ -24,6 +24,7 @@ import java.io.File
 @Composable
 fun ItemDetailsScreen(
     itemId: String,
+    onEdit: () -> Unit,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
@@ -109,6 +110,17 @@ fun ItemDetailsScreen(
 
         Spacer(
             modifier = Modifier.height(24.dp)
+        )
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
+            onClick = onEdit
+        ) {
+            Text("Edit item")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
         )
 
         Button(
