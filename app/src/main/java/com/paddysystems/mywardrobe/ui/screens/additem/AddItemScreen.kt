@@ -37,11 +37,16 @@ import com.paddysystems.mywardrobe.ui.screens.additem.components.ItemImagePrevie
 import com.paddysystems.mywardrobe.ui.screens.additem.components.ClothingTypeSelector
 import com.paddysystems.mywardrobe.ui.screens.additem.components.ColourSelector
 
+import androidx.compose.runtime.rememberCoroutineScope
+import com.paddysystems.mywardrobe.data.storage.saveWardrobeItem
+import kotlinx.coroutines.launch
+
 @Composable
 fun AddItemScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var selectedImageUri by remember {
         mutableStateOf<Uri?>(null)
@@ -245,6 +250,50 @@ fun AddItemScreen(
                             predictedColours = colours
                         }
                     )
+
+                    Spacer(
+                        modifier = Modifier.height(16.dp)
+                    )
+
+                    Button(
+                        modifier = Modifier.fillMaxWidth(),
+                        enabled =
+                            selectedImageUri != null &&
+                                    predictedClothingTypeId != null &&
+                                    predictedColours.isNotEmpty(),
+                        onClick = {
+                            val imageUri =
+                                selectedImageUri
+                                    ?: return@Button
+
+                            val clothingTypeId =
+                                predictedClothingTypeId
+                                    ?: return@Button
+
+                            scope.launch {
+                                val savedItem =
+                                    withContext(Dispatchers.IO) {
+                                        saveWardrobeItem(
+                                            context = context.applicationContext,
+                                            imageUri = imageUri,
+                                            clothingTypeId = clothingTypeId,
+                                            colours = predictedColours
+                                        )
+                                    }
+
+                                if (savedItem != null) {
+                                    onBack()
+                                } else {
+                                    Log.e(
+                                        "AddItem",
+                                        "Could not save wardrobe item"
+                                    )
+                                }
+                            }
+                        }
+                    ) {
+                        Text("Save item")
+                    }
                 }
             }
         }
