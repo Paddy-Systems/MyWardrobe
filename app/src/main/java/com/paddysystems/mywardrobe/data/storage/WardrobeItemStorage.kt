@@ -17,7 +17,8 @@ fun saveWardrobeItem(
     imageUri: Uri,
     clothingTypeId: String,
     colours: List<String>,
-    imageEmbedding: FloatArray
+    imageEmbedding: FloatArray,
+    metadata: WardrobeMetadata
 ): WardrobeItem? {
     val imageFile = saveImage(
         context,
@@ -29,7 +30,9 @@ fun saveWardrobeItem(
         imagePath = imageFile.absolutePath,
         clothingTypeId = clothingTypeId,
         colours = colours,
-        createdAt = System.currentTimeMillis()
+        createdAt =
+            System.currentTimeMillis(),
+        metadata = metadata
     )
 
     val itemDirectory = File(
@@ -169,14 +172,21 @@ fun deleteWardrobeItem(
     context: Context,
     item: WardrobeItem
 ): Boolean {
-    val imageFile = File(
-        item.imagePath
-    )
 
-    val itemFile = File(
-        context.filesDir,
-        "wardrobe_items/${item.id}.json"
-    )
+    val imageFile =
+        File(item.imagePath)
+
+    val itemFile =
+        File(
+            context.filesDir,
+            "wardrobe_items/${item.id}.json"
+        )
+
+    val embeddingFile =
+        getEmbeddingFile(
+            context = context,
+            itemId = item.id
+        )
 
     val imageDeleted =
         !imageFile.exists() ||
@@ -186,8 +196,13 @@ fun deleteWardrobeItem(
         !itemFile.exists() ||
                 itemFile.delete()
 
+    val embeddingDeleted =
+        !embeddingFile.exists() ||
+                embeddingFile.delete()
+
     return imageDeleted &&
-            metadataDeleted
+            metadataDeleted &&
+            embeddingDeleted
 }
 
 fun loadWardrobeItem(

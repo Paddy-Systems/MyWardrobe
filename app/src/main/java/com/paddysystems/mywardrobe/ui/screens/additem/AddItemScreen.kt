@@ -41,6 +41,10 @@ import androidx.compose.runtime.rememberCoroutineScope
 import com.paddysystems.mywardrobe.data.storage.saveWardrobeItem
 import kotlinx.coroutines.launch
 
+import com.paddysystems.mywardrobe.data.model.WardrobeMetadata
+import com.paddysystems.mywardrobe.ml.FashionAnalysisResult
+import com.paddysystems.mywardrobe.ml.SemanticMetadataAnalyzer
+
 @Composable
 fun AddItemScreen(
     onBack: () -> Unit
@@ -71,6 +75,12 @@ fun AddItemScreen(
 
     var imageEmbedding by remember {
         mutableStateOf<FloatArray?>(null)
+    }
+
+    var predictedMetadata by remember {
+        mutableStateOf(
+            WardrobeMetadata()
+        )
     }
 
     var predictedClothingTypeId by remember {
@@ -142,78 +152,136 @@ fun AddItemScreen(
                         ?: return@LaunchedEffect
 
                     try {
-                        val (
-                            embedding,
-                            clothingMatches,
-                            colourMatches
-                        ) = withContext(Dispatchers.IO) {
-                                val encoder = FashionSigLipEncoder(
-                                    context.applicationContext
-                                )
+                        val result =
+                            withContext(Dispatchers.IO) {
 
-                                val embedding = encoder.encode(imageUri)
-
-
-
-                                val clothingMatcher = ClothingEmbeddingMatcher(
-                                    context.applicationContext
-                                )
-
-                                val colourMatcher = ColourEmbeddingMatcher(
-                                    context.applicationContext
-                                )
-
-                            Triple(
-                                embedding,
-
-                                clothingMatcher.topMatches(
-                                    embedding,
-                                    5
-                                ),
-
-                                colourMatcher.topMatches(
-                                    embedding,
-                                    5
-                                )
-                            )
-
-                            }
-                        Log.d(
-                            "FashionSigLIP",
-                            buildString {
-                                appendLine("Top clothing matches:")
-
-                                clothingMatches.forEach { match ->
-                                    appendLine(
-                                        "${match.id}: ${match.similarity}"
+                                val encoder =
+                                    FashionSigLipEncoder(
+                                        context.applicationContext
                                     )
-                                }
-                            }
-                        )
-                        Log.d(
-                            "FashionSigLIP",
-                            buildString {
-                                appendLine("Top colour matches:")
 
-                                colourMatches.forEach { match ->
-                                    appendLine(
-                                        "${match.id}: ${match.similarity}"
+                                val embedding =
+                                    encoder.encode(imageUri)
+
+                                val clothingMatcher =
+                                    ClothingEmbeddingMatcher(
+                                        context.applicationContext
                                     )
-                                }
+
+                                val colourMatcher =
+                                    ColourEmbeddingMatcher(
+                                        context.applicationContext
+                                    )
+
+                                val metadataAnalyzer =
+                                    SemanticMetadataAnalyzer(
+                                        context.applicationContext
+                                    )
+
+                                FashionAnalysisResult(
+                                    embedding = embedding,
+
+                                    clothingMatches =
+                                        clothingMatcher.topMatches(
+                                            embedding,
+                                            5
+                                        ),
+
+                                    colourMatches =
+                                        colourMatcher.topMatches(
+                                            embedding,
+                                            5
+                                        ),
+
+                                    metadata =
+                                        metadataAnalyzer.analyze(
+                                            embedding
+                                        )
+                                )
                             }
-                        )
                         imageEmbedding =
-                            embedding
+                            result.embedding
+
                         predictedClothingTypeId =
-                            clothingMatches.firstOrNull()?.id
+                            result.clothingMatches
+                                .firstOrNull()
+                                ?.id
 
                         predictedColours =
-                            colourMatches
+                            result.colourMatches
                                 .firstOrNull()
-                                ?.let { listOf(it.id) }
+                                ?.let {
+                                    listOf(it.id)
+                                }
                                 ?: emptyList()
 
+                        predictedMetadata =
+                            result.metadata
+
                         currentStep = AddItemStep.DETAILS
+
+                        Log.d(
+                            "FashionSigLIP",
+                            buildString {
+                                appendLine(
+                                    "Semantic metadata:"
+                                )
+
+                                appendLine(
+                                    "Patterns: ${
+                                        result.metadata.patterns
+                                            .joinToString {
+                                                "${it.id}:${it.similarity}"
+                                            }
+                                    }"
+                                )
+
+                                appendLine(
+                                    "Materials: ${
+                                        result.metadata.materials
+                                            .joinToString {
+                                                "${it.id}:${it.similarity}"
+                                            }
+                                    }"
+                                )
+
+                                appendLine(
+                                    "Styles: ${
+                                        result.metadata.styles
+                                            .joinToString {
+                                                "${it.id}:${it.similarity}"
+                                            }
+                                    }"
+                                )
+
+                                appendLine(
+                                    "Occasions: ${
+                                        result.metadata.occasions
+                                            .joinToString {
+                                                "${it.id}:${it.similarity}"
+                                            }
+                                    }"
+                                )
+
+                                appendLine(
+                                    "Seasons: ${
+                                        result.metadata.seasons
+                                            .joinToString {
+                                                "${it.id}:${it.similarity}"
+                                            }
+                                    }"
+                                )
+
+                                appendLine(
+                                    "Formalities: ${
+                                        result.metadata.formalities
+                                            .joinToString {
+                                                "${it.id}:${it.similarity}"
+                                            }
+                                    }"
+                                )
+                            }
+                        )
                     } catch (exception: Exception) {
                         Log.e(
                             "FashionSigLIP",
@@ -306,7 +374,10 @@ fun AddItemScreen(
                                                 predictedColours,
 
                                             imageEmbedding =
-                                                embedding
+                                                embedding,
+
+                                            metadata =
+                                                predictedMetadata
                                         )
                                     }
 
