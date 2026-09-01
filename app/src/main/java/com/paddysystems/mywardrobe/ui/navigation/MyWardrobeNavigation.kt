@@ -15,6 +15,9 @@ import com.paddysystems.mywardrobe.ui.screens.createoutfit.CreateOutfitScreen
 import com.paddysystems.mywardrobe.ui.screens.outfits.OutfitsScreen
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.remember
 
 
 private object Routes {
@@ -55,6 +58,11 @@ fun MyWardrobeNavigation(
 ) {
     val navController =
         rememberNavController()
+
+    var outfitsRefreshKey
+            by remember {
+                mutableIntStateOf(0)
+            }
 
     val backStackEntry by
     navController
@@ -148,13 +156,33 @@ fun MyWardrobeNavigation(
             composable(
                 Routes.CREATE_OUTFIT
             ) {
-                CreateOutfitScreen()
+                CreateOutfitScreen(
+                    onSaved = {
+
+                        outfitsRefreshKey++
+
+                        navController.navigate(
+                            Routes.OUTFITS
+                        ) {
+                            popUpTo(
+                                Routes.CREATE_OUTFIT
+                            ) {
+                                inclusive = true
+                            }
+
+                            launchSingleTop = true
+                        }
+                    }
+                )
             }
 
             composable(
                 Routes.OUTFITS
             ) {
-                OutfitsScreen()
+                OutfitsScreen(
+                    refreshKey =
+                        outfitsRefreshKey
+                )
             }
 
             // Keep your existing

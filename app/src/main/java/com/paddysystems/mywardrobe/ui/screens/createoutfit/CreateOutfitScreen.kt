@@ -41,12 +41,37 @@ import java.util.UUID
 import kotlin.math.absoluteValue
 import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.OutfitStandaloneSlot
 import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.OutfitAccessoriesRow
+import androidx.compose.runtime.rememberCoroutineScope
+import com.paddysystems.mywardrobe.data.model.Outfit
+import com.paddysystems.mywardrobe.data.storage.saveOutfit
+import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.SaveOutfitDialog
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @Composable
-fun CreateOutfitScreen() {
+fun CreateOutfitScreen(
+    onSaved: () -> Unit = {}
+) {
 
     val context =
         LocalContext.current
+
+    val scope =
+        rememberCoroutineScope()
+
+    var showSaveDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var isSaving by remember {
+        mutableStateOf(false)
+    }
+
+    var saveError by remember {
+        mutableStateOf<String?>(null)
+    }
+
 
     val wardrobeItems =
         remember {
@@ -153,6 +178,46 @@ fun CreateOutfitScreen() {
     var requestedPage by remember {
         mutableStateOf<Int?>(null)
     }
+
+    val suggestedName =
+        remember(
+            layers,
+            shoes,
+            bag,
+            accessories,
+            wardrobeItems
+        ) {
+            suggestOutfitName(
+                layers = layers,
+                shoes = shoes,
+                bag = bag,
+                accessories =
+                    accessories,
+                wardrobeItems =
+                    wardrobeItems
+            )
+        }
+
+    val hasAnySelection =
+        layers.any { layer ->
+
+            when (layer.mode) {
+
+                OutfitLayerMode.SEPARATES ->
+                    layer.top.itemId != null ||
+                            layer.bottom.itemId != null
+
+                OutfitLayerMode.FULL_LENGTH ->
+                    layer.fullLength
+                        .itemId != null
+            }
+
+        } ||
+                shoes.itemId != null ||
+                bag.itemId != null ||
+                accessories.any {
+                    it.itemId != null
+                }
 
     /*
      * Run after the layer list has
@@ -676,6 +741,85 @@ fun CreateOutfitScreen() {
             )
         }
 
+        if (showSaveDialog) {
+
+            SaveOutfitDialog(
+                suggestedName =
+                    suggestedName,
+
+                onDismiss = {
+                    showSaveDialog =
+                        false
+                },
+
+                onSave = {
+                        name ->
+
+                    showSaveDialog =
+                        false
+
+                    isSaving =
+                        true
+
+                    saveError =
+                        null
+
+                    val outfit =
+                        Outfit(
+                            id =
+                                UUID.randomUUID()
+                                    .toString(),
+
+                            name =
+                                name,
+
+                            layers =
+                                layers,
+
+                            shoes =
+                                shoes,
+
+                            bag =
+                                bag,
+
+                            accessories =
+                                accessories,
+
+                            createdAt =
+                                System
+                                    .currentTimeMillis()
+                        )
+
+                    scope.launch {
+
+                        val saved =
+                            withContext(
+                                Dispatchers.IO
+                            ) {
+                                saveOutfit(
+                                    context =
+                                        context
+                                            .applicationContext,
+
+                                    outfit =
+                                        outfit
+                                )
+                            }
+
+                        isSaving =
+                            false
+
+                        if (saved) {
+                            onSaved()
+                        } else {
+                            saveError =
+                                "Could not save outfit"
+                        }
+                    }
+                }
+            )
+        }
+
         Spacer(
             modifier =
                 Modifier.height(20.dp)
@@ -821,6 +965,44 @@ fun CreateOutfitScreen() {
             }
         ) {
             Text("Shuffle whole outfit")
+        }
+
+        Spacer(
+            modifier =
+                Modifier.height(12.dp)
+        )
+
+        Button(
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            enabled =
+                hasAnySelection &&
+                        !isSaving,
+
+            onClick = {
+                saveError = null
+                showSaveDialog = true
+            }
+        ) {
+            Text(
+                if (isSaving) {
+                    "Saving..."
+                } else {
+                    "Save Outfit"
+                }
+            )
+        }
+
+        saveError?.let {
+            Text(
+                text = it,
+
+                modifier =
+                    Modifier.padding(
+                        top = 8.dp
+                    )
+            )
         }
 
         Spacer(
