@@ -10,32 +10,46 @@ fun cycleOutfitItem(
     direction: Int
 ): String? {
 
-    if (items.isEmpty()) {
+    /*
+     * Empty is a real position in the cycle:
+     *
+     * Empty
+     * Item 1
+     * Item 2
+     * Item 3
+     * Empty
+     */
+
+    val itemIds =
+        listOf<String?>(null) +
+                items.map {
+                    it.id
+                }
+
+    if (itemIds.size == 1) {
         return null
     }
 
     val currentIndex =
-        items.indexOfFirst {
-            it.id == currentItemId
-        }
-
-    if (currentIndex == -1) {
-        return if (direction >= 0) {
-            items.first().id
-        } else {
-            items.last().id
-        }
-    }
+        itemIds.indexOf(
+            currentItemId
+        )
+            .takeIf {
+                it >= 0
+            }
+            ?: 0
 
     val nextIndex =
         (
                 currentIndex +
                         direction
                 ).floorMod(
-                items.size
+                itemIds.size
             )
 
-    return items[nextIndex].id
+    return itemIds[
+        nextIndex
+    ]
 }
 
 private fun Int.floorMod(

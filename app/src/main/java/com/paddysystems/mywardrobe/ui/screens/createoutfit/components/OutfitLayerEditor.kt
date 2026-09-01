@@ -60,6 +60,17 @@ fun OutfitLayerEditor(
                     layer.fullLength.itemId
         }
 
+    val hasPlacedClothing =
+        when (layer.mode) {
+
+            OutfitLayerMode.SEPARATES ->
+                topItem != null ||
+                        bottomItem != null
+
+            OutfitLayerMode.FULL_LENGTH ->
+                fullLengthItem != null
+        }
+
     Column(
         modifier = modifier
     ) {
@@ -179,14 +190,16 @@ fun OutfitLayerEditor(
                 modifier =
                     Modifier.fillMaxSize()
             ) {
-                OutfitSilhouette(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .padding(
-                            horizontal = 52.dp,
-                            vertical = 20.dp
-                        )
-                )
+                if (!hasPlacedClothing) {
+                    OutfitSilhouette(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .padding(
+                                horizontal = 52.dp,
+                                vertical = 20.dp
+                            )
+                    )
+                }
 
                 when (layer.mode) {
 

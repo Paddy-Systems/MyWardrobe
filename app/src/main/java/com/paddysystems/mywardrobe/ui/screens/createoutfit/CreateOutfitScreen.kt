@@ -263,7 +263,17 @@ fun CreateOutfitScreen() {
                         layers,
 
                     wardrobeItems =
-                        wardrobeItems
+                        wardrobeItems,
+
+                    onLayerClick = {
+                            layerIndex ->
+
+                        requestedPage =
+                            layerIndex
+
+                        showStackedView =
+                            false
+                    }
                 )
             }
 

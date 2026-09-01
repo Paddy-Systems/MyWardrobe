@@ -1,27 +1,35 @@
 package com.paddysystems.mywardrobe.ui.screens.createoutfit.components
 
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.zIndex
 import com.paddysystems.mywardrobe.data.model.OutfitLayer
 import com.paddysystems.mywardrobe.data.model.OutfitLayerMode
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.padding
+
+private const val CARD_PEEK_FRACTION =
+    0.25f
 
 @Composable
 fun StackedOutfitPreview(
     layers: List<OutfitLayer>,
     wardrobeItems: List<WardrobeItem>,
+    onLayerClick: (Int) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val itemsById =
@@ -31,139 +39,287 @@ fun StackedOutfitPreview(
             }
         }
 
-    Surface(
+    if (layers.isEmpty()) {
+        return
+    }
+
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
-            .height(500.dp),
-
-        shape =
-            RoundedCornerShape(
-                24.dp
-            ),
-
-        color =
-            MaterialTheme
-                .colorScheme
-                .surfaceVariant
-                .copy(
-                    alpha = 0.45f
-                )
+            .height(500.dp)
     ) {
+        /*
+         * Example with 3 cards:
+         *
+         * full card width
+         * + 25% peek
+         * + 25% peek
+         *
+         * must equal available width.
+         */
+        val multiplier =
+            1f +
+                    (
+                            CARD_PEEK_FRACTION *
+                                    (layers.size - 1)
+                            )
+
+        val cardWidth =
+            maxWidth /
+                    multiplier
+
+        val peekWidth =
+            cardWidth *
+                    CARD_PEEK_FRACTION
+
         Box(
             modifier =
                 Modifier.fillMaxSize()
         ) {
+            layers.forEachIndexed {
+                    index,
+                    layer ->
+
+                LayerStackCard(
+                    layer = layer,
+
+                    layerNumber =
+                        index + 1,
+
+                    itemsById =
+                        itemsById,
+
+                    width =
+                        cardWidth,
+
+                    offsetX =
+                        peekWidth *
+                                index,
+
+                    onClick = {
+                        onLayerClick(
+                            index
+                        )
+                    },
+
+                    modifier =
+                        Modifier.zIndex(
+                            index.toFloat()
+                        )
+                )
+            }
+        }
+    }
+}
+
+@Composable
+private fun LayerStackCard(
+    layer: OutfitLayer,
+    layerNumber: Int,
+    itemsById:
+    Map<String, WardrobeItem>,
+    width: Dp,
+    offsetX: Dp,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    androidx.compose.material3.Surface(
+        modifier = modifier
+            .then(
+                Modifier
+                    .fillMaxSize()
+            )
+            .offset(
+                x = offsetX
+            )
+            .width(width)
+            .height(480.dp),
+
+        onClick =
+            onClick,
+
+        shape =
+            androidx.compose.foundation
+                .shape
+                .RoundedCornerShape(
+                    22.dp
+                ),
+
+        color =
+            MaterialTheme
+                .colorScheme
+                .surface,
+
+        shadowElevation =
+            8.dp,
+
+        tonalElevation =
+            2.dp
+    ) {
+
+        Box(
+            modifier =
+                Modifier.fillMaxSize()
+        ) {
+
+            LayerPreviewContents(
+                layer =
+                    layer,
+
+                layerNumber =
+                    layerNumber,
+
+                itemsById =
+                    itemsById
+            )
+        }
+    }
+}
+
+@Composable
+private fun LayerPreviewContents(
+    layer: OutfitLayer,
+    layerNumber: Int,
+    itemsById:
+    Map<String, WardrobeItem>
+) {
+    val topItem =
+        layer.top.itemId
+            ?.let {
+                itemsById[it]
+            }
+
+    val bottomItem =
+        layer.bottom.itemId
+            ?.let {
+                itemsById[it]
+            }
+
+    val fullLengthItem =
+        layer.fullLength.itemId
+            ?.let {
+                itemsById[it]
+            }
+
+    val hasClothing =
+        when (layer.mode) {
+
+            OutfitLayerMode.SEPARATES ->
+                topItem != null ||
+                        bottomItem != null
+
+            OutfitLayerMode.FULL_LENGTH ->
+                fullLengthItem != null
+        }
+
+    Box(
+        modifier =
+            Modifier.fillMaxSize()
+    ) {
+        Text(
+            text =
+                "Layer $layerNumber",
+
+            modifier =
+                Modifier
+                    .align(
+                        Alignment.TopStart
+                    )
+                    .padding(
+                        14.dp
+                    ),
+
+            style =
+                MaterialTheme
+                    .typography
+                    .titleMedium
+        )
+
+        if (!hasClothing) {
+
             OutfitSilhouette(
                 modifier = Modifier
-                    .matchParentSize()
+                    .fillMaxSize()
                     .padding(
-                        horizontal = 52.dp,
-                        vertical = 20.dp
+                        horizontal =
+                            42.dp,
+
+                        vertical =
+                            45.dp
                     )
             )
 
-            /*
-             * Important:
-             *
-             * Layers are drawn in order.
-             *
-             * Layer 1 first.
-             * Layer 2 over it.
-             * Layer 3 over that.
-             */
-            layers.forEach { layer ->
+            return@Box
+        }
 
-                when (layer.mode) {
+        when (layer.mode) {
 
-                    OutfitLayerMode.SEPARATES -> {
+            OutfitLayerMode.SEPARATES -> {
 
-                        layer.top.itemId
-                            ?.let {
-                                itemsById[it]
-                            }
-                            ?.let { item ->
+                topItem?.let { item ->
 
-                                OutfitGarmentImage(
-                                    item = item,
+                    OutfitGarmentImage(
+                        item = item,
 
-                                    modifier =
-                                        Modifier
-                                            .align(
-                                                Alignment
-                                                    .TopCenter
-                                            )
-                                            .padding(
-                                                top =
-                                                    38.dp
-                                            )
-                                            .fillMaxWidth(
-                                                0.80f
-                                            )
-                                            .height(
-                                                215.dp
-                                            )
-                                )
-                            }
-
-                        layer.bottom.itemId
-                            ?.let {
-                                itemsById[it]
-                            }
-                            ?.let { item ->
-
-                                OutfitGarmentImage(
-                                    item = item,
-
-                                    modifier =
-                                        Modifier
-                                            .align(
-                                                Alignment
-                                                    .BottomCenter
-                                            )
-                                            .padding(
-                                                bottom =
-                                                    18.dp
-                                            )
-                                            .fillMaxWidth(
-                                                0.72f
-                                            )
-                                            .height(
-                                                265.dp
-                                            )
-                                )
-                            }
-                    }
-
-                    OutfitLayerMode.FULL_LENGTH -> {
-
-                        layer.fullLength.itemId
-                            ?.let {
-                                itemsById[it]
-                            }
-                            ?.let { item ->
-
-                                OutfitGarmentImage(
-                                    item = item,
-
-                                    modifier =
-                                        Modifier
-                                            .align(
-                                                Alignment.Center
-                                            )
-                                            .fillMaxWidth(
-                                                0.82f
-                                            )
-                                            .fillMaxHeight(
-                                                0.90f
-                                            )
-                                            .padding(
-                                                vertical =
-                                                    24.dp
-                                            )
-                                )
-                            }
-                    }
+                        modifier = Modifier
+                            .align(
+                                Alignment.TopCenter
+                            )
+                            .padding(
+                                top = 50.dp
+                            )
+                            .fillMaxWidth(
+                                0.82f
+                            )
+                            .height(
+                                185.dp
+                            )
+                    )
                 }
+
+                bottomItem
+                    ?.let { item ->
+
+                        OutfitGarmentImage(
+                            item = item,
+
+                            modifier = Modifier
+                                .align(
+                                    Alignment
+                                        .BottomCenter
+                                )
+                                .padding(
+                                    bottom =
+                                        20.dp
+                                )
+                                .fillMaxWidth(
+                                    0.76f
+                                )
+                                .height(
+                                    235.dp
+                                )
+                        )
+                    }
+            }
+
+            OutfitLayerMode.FULL_LENGTH -> {
+
+                fullLengthItem
+                    ?.let { item ->
+
+                        OutfitGarmentImage(
+                            item = item,
+
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(
+                                    top = 46.dp,
+                                    start = 20.dp,
+                                    end = 20.dp,
+                                    bottom = 16.dp
+                                )
+                        )
+                    }
             }
         }
     }
