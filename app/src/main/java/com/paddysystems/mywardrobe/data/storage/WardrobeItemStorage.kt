@@ -190,3 +190,42 @@ fun loadWardrobeItem(
         null
     }
 }
+
+fun updateWardrobeItem(
+    context: Context,
+    item: WardrobeItem,
+    clothingTypeId: String,
+    colours: List<String>
+): Boolean {
+    val updatedItem = item.copy(
+        clothingTypeId = clothingTypeId,
+        colours = colours
+    )
+
+    val itemFile = File(
+        context.filesDir,
+        "wardrobe_items/${item.id}.json"
+    )
+
+    return try {
+        val json = JSONObject()
+            .put("id", updatedItem.id)
+            .put("imagePath", updatedItem.imagePath)
+            .put(
+                "clothingTypeId",
+                updatedItem.clothingTypeId
+            )
+            .put(
+                "colours",
+                JSONArray(updatedItem.colours)
+            )
+
+        itemFile.writeText(
+            json.toString()
+        )
+
+        true
+    } catch (exception: Exception) {
+        false
+    }
+}

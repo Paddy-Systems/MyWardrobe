@@ -25,12 +25,19 @@ import com.paddysystems.mywardrobe.ui.screens.additem.components.ClothingTypeSel
 import com.paddysystems.mywardrobe.ui.screens.additem.components.ColourSelector
 import java.io.File
 
+import androidx.compose.runtime.rememberCoroutineScope
+import com.paddysystems.mywardrobe.data.storage.updateWardrobeItem
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+
 @Composable
 fun EditItemScreen(
     itemId: String,
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     val item = remember(itemId) {
         loadWardrobeItem(
@@ -123,6 +130,37 @@ fun EditItemScreen(
         )
 
         Button(
+            modifier = Modifier.fillMaxWidth(),
+            enabled = selectedColours.isNotEmpty(),
+            onClick = {
+                scope.launch {
+                    val saved =
+                        withContext(Dispatchers.IO) {
+                            updateWardrobeItem(
+                                context = context.applicationContext,
+                                item = item,
+                                clothingTypeId =
+                                    selectedClothingTypeId,
+                                colours =
+                                    selectedColours
+                            )
+                        }
+
+                    if (saved) {
+                        onBack()
+                    }
+                }
+            }
+        ) {
+            Text("Save changes")
+        }
+
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
+
+        Button(
+            modifier = Modifier.fillMaxWidth(),
             onClick = onBack
         ) {
             Text("Back")
