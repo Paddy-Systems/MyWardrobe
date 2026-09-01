@@ -54,26 +54,9 @@ fun saveWardrobeItem(
             embedding = imageEmbedding
         )
 
-        val json = JSONObject()
-            .put("id", item.id)
-            .put("imagePath", item.imagePath)
-            .put("clothingTypeId", item.clothingTypeId)
-            .put(
-                "colours",
-                JSONArray(item.colours)
-            ).put(
-                "createdAt",
-                item.createdAt
-            )
-            .put(
-                "metadata",
-                metadataToJson(
-                    item.metadata
-                )
-            ).put(
-                "cutoutPath",
-                item.cutoutPath
-                    ?: JSONObject.NULL
+        val json =
+            wardrobeItemToJson(
+                item
             )
 
         itemFile.writeText(
@@ -328,29 +311,9 @@ fun updateWardrobeItem(
     )
 
     return try {
-        val json = JSONObject()
-            .put("id", updatedItem.id)
-            .put("imagePath", updatedItem.imagePath)
-            .put(
-                "clothingTypeId",
-                updatedItem.clothingTypeId
-            )
-            .put(
-                "colours",
-                JSONArray(updatedItem.colours)
-            ).put(
-                "createdAt",
-                updatedItem.createdAt
-            )
-            .put(
-                "metadata",
-                metadataToJson(
-                    updatedItem.metadata
-                )
-            ).put(
-                "cutoutPath",
-                updatedItem.cutoutPath
-                    ?: JSONObject.NULL
+        val json =
+            wardrobeItemToJson(
+                item
             )
 
         itemFile.writeText(
@@ -558,6 +521,79 @@ fun loadWardrobeItemEmbedding(
                 input.readFloat()
             }
         }
+    } catch (exception: Exception) {
+        null
+    }
+}
+
+private fun wardrobeItemToJson(
+    item: WardrobeItem
+): JSONObject {
+
+    return JSONObject()
+        .put(
+            "id",
+            item.id
+        )
+        .put(
+            "imagePath",
+            item.imagePath
+        )
+        .put(
+            "clothingTypeId",
+            item.clothingTypeId
+        )
+        .put(
+            "colours",
+            JSONArray(
+                item.colours
+            )
+        )
+        .put(
+            "createdAt",
+            item.createdAt
+        )
+        .put(
+            "metadata",
+            metadataToJson(
+                item.metadata
+            )
+        )
+        .put(
+            "cutoutPath",
+            item.cutoutPath
+                ?: JSONObject.NULL
+        )
+}
+
+fun updateWardrobeItemCutout(
+    context: Context,
+    item: WardrobeItem,
+    cutoutPath: String
+): WardrobeItem? {
+
+    val updatedItem =
+        item.copy(
+            cutoutPath =
+                cutoutPath
+        )
+
+    val itemFile =
+        File(
+            context.filesDir,
+            "wardrobe_items/${item.id}.json"
+        )
+
+    return try {
+
+        itemFile.writeText(
+            wardrobeItemToJson(
+                updatedItem
+            ).toString()
+        )
+
+        updatedItem
+
     } catch (exception: Exception) {
         null
     }

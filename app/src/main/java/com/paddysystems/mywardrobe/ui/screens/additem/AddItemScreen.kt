@@ -44,7 +44,7 @@ import kotlinx.coroutines.launch
 import com.paddysystems.mywardrobe.data.model.WardrobeMetadata
 import com.paddysystems.mywardrobe.ml.FashionAnalysisResult
 import com.paddysystems.mywardrobe.ml.SemanticMetadataAnalyzer
-
+import com.paddysystems.mywardrobe.data.storage.WardrobeCutoutService
 @Composable
 fun AddItemScreen(
     onBack: () -> Unit
@@ -62,6 +62,10 @@ fun AddItemScreen(
 
     var currentStep by remember {
         mutableStateOf(AddItemStep.IMAGE)
+    }
+
+    var isSaving by remember {
+        mutableStateOf(false)
     }
 
     val galleryPicker = rememberLauncherForActivityResult(
@@ -340,7 +344,8 @@ fun AddItemScreen(
                     Button(
                         modifier = Modifier.fillMaxWidth(),
                         enabled =
-                            selectedImageUri != null &&
+                            !isSaving &&
+                                    selectedImageUri != null &&
                                     predictedClothingTypeId != null &&
                                     predictedColours.isNotEmpty() &&
                                     imageEmbedding != null,
@@ -357,33 +362,71 @@ fun AddItemScreen(
                                 imageEmbedding
                                     ?: return@Button
 
+                            isSaving = true
+
                             scope.launch {
+
                                 val savedItem =
-                                    withContext(Dispatchers.IO) {
-                                        saveWardrobeItem(
-                                            context =
-                                                context.applicationContext,
+                                    withContext(
+                                        Dispatchers.IO
+                                    ) {
 
-                                            imageUri =
-                                                imageUri,
+                                        val item =
+                                            saveWardrobeItem(
+                                                context =
+                                                    context.applicationContext,
 
-                                            clothingTypeId =
-                                                clothingTypeId,
+                                                imageUri =
+                                                    imageUri,
 
-                                            colours =
-                                                predictedColours,
+                                                clothingTypeId =
+                                                    clothingTypeId,
 
-                                            imageEmbedding =
-                                                embedding,
+                                                colours =
+                                                    predictedColours,
 
-                                            metadata =
-                                                predictedMetadata
-                                        )
+                                                imageEmbedding =
+                                                    embedding,
+
+                                                metadata =
+                                                    predictedMetadata
+                                            )
+                                                ?: return@withContext null
+
+                                        try {
+                                            WardrobeCutoutService
+                                                .ensureCutout(
+                                                    context =
+                                                        context.applicationContext,
+
+                                                    item =
+                                                        item
+                                                )
+                                        } catch (
+                                            exception: Exception
+                                        ) {
+                                            /*
+                                             * Cut-out generation failing
+                                             * must NOT lose the wardrobe
+                                             * item.
+                                             *
+                                             * We can regenerate it later.
+                                             */
+                                            Log.e(
+                                                "ISNet",
+                                                "Could not generate cut-out",
+                                                exception
+                                            )
+
+                                            item
+                                        }
                                     }
 
                                 if (savedItem != null) {
                                     onBack()
                                 } else {
+                                    isSaving = false
+
                                     Log.e(
                                         "AddItem",
                                         "Could not save wardrobe item"
@@ -392,7 +435,13 @@ fun AddItemScreen(
                             }
                         }
                     ) {
-                        Text("Save item")
+                        Text(
+                            if (isSaving) {
+                                "Preparing cut-out..."
+                            } else {
+                                "Save item"
+                            }
+                        )
                     }
                 }
             }
@@ -403,8 +452,14 @@ fun AddItemScreen(
         )
 
         OutlinedButton(
-            modifier = Modifier.fillMaxWidth(),
-            onClick = onBack
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            enabled =
+                !isSaving,
+
+            onClick =
+                onBack
         ) {
             Text("Back")
         }

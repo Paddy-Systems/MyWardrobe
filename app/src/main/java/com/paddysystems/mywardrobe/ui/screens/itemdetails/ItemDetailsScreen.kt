@@ -24,6 +24,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.paddysystems.mywardrobe.data.model.wardrobeLabel
 import com.paddysystems.mywardrobe.ui.screens.itemdetails.components.SemanticMetadataSection
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 
 @Composable
 fun ItemDetailsScreen(
@@ -62,6 +64,16 @@ fun ItemDetailsScreen(
         return
     }
 
+    val cutoutFile =
+        item.cutoutPath
+            ?.let {
+                File(it)
+            }
+            ?.takeIf {
+                it.exists()
+            }
+
+
     val clothingTypeName =
         defaultClothingTypes
             .firstOrNull {
@@ -95,6 +107,60 @@ fun ItemDetailsScreen(
                     RoundedCornerShape(16.dp)
                 )
         )
+
+        if (cutoutFile != null) {
+
+            Spacer(
+                modifier =
+                    Modifier.height(16.dp)
+            )
+
+            Text(
+                "Transparent cut-out"
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(8.dp)
+            )
+
+            Surface(
+                modifier =
+                    Modifier.fillMaxWidth(),
+
+                color =
+                    MaterialTheme
+                        .colorScheme
+                        .surfaceVariant,
+
+                shape =
+                    RoundedCornerShape(
+                        16.dp
+                    )
+            ) {
+
+                AsyncImage(
+                    model =
+                        cutoutFile,
+
+                    contentDescription =
+                        "Transparent clothing cut-out",
+
+                    contentScale =
+                        ContentScale.Fit,
+
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .height(
+                                300.dp
+                            )
+                            .padding(
+                                12.dp
+                            )
+                )
+            }
+        }
 
         Spacer(
             modifier = Modifier.height(16.dp)
