@@ -12,7 +12,15 @@ import com.paddysystems.mywardrobe.ui.screens.itemdetails.ItemDetailsScreen
 private object Routes {
     const val WARDROBE = "wardrobe"
     const val ADD_ITEM = "add-item"
-    const val ITEM_DETAILS = "item-details"
+
+    const val ITEM_DETAILS =
+        "item-details/{itemId}"
+
+    fun itemDetails(
+        itemId: String
+    ): String {
+        return "item-details/$itemId"
+    }
 }
 
 @Composable
@@ -31,8 +39,10 @@ fun MyWardrobeNavigation(
                 onAddItemClick = {
                     navController.navigate(Routes.ADD_ITEM)
                 },
-                onItemClick = {
-                    navController.navigate(Routes.ITEM_DETAILS)
+                onItemClick = { item ->
+                    navController.navigate(
+                        Routes.itemDetails(item.id)
+                    )
                 }
             )
         }
@@ -45,8 +55,14 @@ fun MyWardrobeNavigation(
             )
         }
 
-        composable(Routes.ITEM_DETAILS) {
+        composable(Routes.ITEM_DETAILS) { backStackEntry ->
+            val itemId =
+                backStackEntry.arguments
+                    ?.getString("itemId")
+                    ?: return@composable
+
             ItemDetailsScreen(
+                itemId = itemId,
                 onBack = {
                     navController.popBackStack()
                 }

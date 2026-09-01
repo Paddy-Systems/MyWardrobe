@@ -31,7 +31,7 @@ import com.paddysystems.mywardrobe.data.storage.deleteWardrobeItem
 fun WardrobeScreen(
     modifier: Modifier = Modifier,
     onAddItemClick: () -> Unit = {},
-    onItemClick: (File) -> Unit = {}
+    onItemClick: (WardrobeItem) -> Unit = {}
 ) {
     val context = LocalContext.current
 
@@ -103,9 +103,7 @@ fun WardrobeScreen(
                         selectedItems.add(item)
                     }
                 } else {
-                    onItemClick(
-                        File(item.imagePath)
-                    )
+                    onItemClick(item)
                 }
             },
             onItemLongClick = { item ->

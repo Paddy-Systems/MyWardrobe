@@ -11,6 +11,7 @@ import androidx.compose.ui.Modifier
 
 @Composable
 fun ItemDetailsScreen(
+    itemId: String,
     onBack: () -> Unit
 ) {
     Column(
@@ -19,6 +20,10 @@ fun ItemDetailsScreen(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Item Details")
+
+        Text(
+            "ID: $itemId"
+        )
 
         Button(
             onClick = onBack
