@@ -117,3 +117,28 @@ fun loadWardrobeItems(
         }
         ?: emptyList()
 }
+
+fun deleteWardrobeItem(
+    context: Context,
+    item: WardrobeItem
+): Boolean {
+    val imageFile = File(
+        item.imagePath
+    )
+
+    val itemFile = File(
+        context.filesDir,
+        "wardrobe_items/${item.id}.json"
+    )
+
+    val imageDeleted =
+        !imageFile.exists() ||
+                imageFile.delete()
+
+    val metadataDeleted =
+        !itemFile.exists() ||
+                itemFile.delete()
+
+    return imageDeleted &&
+            metadataDeleted
+}

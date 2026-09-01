@@ -25,6 +25,7 @@ import com.paddysystems.mywardrobe.ui.components.AddItemButton
 import com.paddysystems.mywardrobe.ui.components.WardrobeHeader
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
+import com.paddysystems.mywardrobe.data.storage.deleteWardrobeItem
 
 @Composable
 fun WardrobeScreen(
@@ -116,26 +117,32 @@ fun WardrobeScreen(
             }
         )
 
-//        if (showDeleteConfirmation) {
-//            DeleteConfirmationDialog(
-//                selectedCount = selectedItems.size,
-//                onDismiss = {
-//                    showDeleteConfirmation = false
-//                },
-//                onConfirm = {
-//                    val imagesToDelete = selectedItems.toList()
-//
-//                    imagesToDelete.forEach { imageFile ->
-//                        if (deleteImage(imageFile)) {
-//                            images.remove(imageFile)
-//                        }
-//                    }
-//
-//                    selectedItems.clear()
-//                    showDeleteConfirmation = false
-//                }
-//            )
-//        }
+        if (showDeleteConfirmation) {
+            DeleteConfirmationDialog(
+                selectedCount = selectedItems.size,
+                onDismiss = {
+                    showDeleteConfirmation = false
+                },
+                onConfirm = {
+                    val itemsToDelete =
+                        selectedItems.toList()
+
+                    itemsToDelete.forEach { item ->
+                        if (
+                            deleteWardrobeItem(
+                                context = context,
+                                item = item
+                            )
+                        ) {
+                            items.remove(item)
+                        }
+                    }
+
+                    selectedItems.clear()
+                    showDeleteConfirmation = false
+                }
+            )
+        }
 
         AddItemButton(
             onClick = onAddItemClick
