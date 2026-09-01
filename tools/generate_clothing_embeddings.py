@@ -1,6 +1,7 @@
 import json
 import torch
 import open_clip
+from pathlib import Path
 
 MODEL_NAME = "hf-hub:Marqo/marqo-fashionSigLIP"
 
@@ -66,6 +67,84 @@ colours = {
     "teal": "a teal item of clothing",
 }
 
+semantic_vocabularies = {
+    "patterns": {
+        "solid": "plain solid colour clothing with no pattern",
+        "striped": "striped patterned clothing",
+        "checked": "checked pattern clothing",
+        "plaid": "plaid tartan clothing",
+        "floral": "floral print clothing",
+        "graphic": "graphic print clothing with an image or logo",
+        "polka_dot": "polka dot clothing",
+        "animal_print": "animal print clothing",
+        "camouflage": "camouflage pattern clothing",
+        "abstract": "abstract patterned clothing",
+    },
+
+    "materials": {
+        "denim": "denim clothing fabric",
+        "cotton": "cotton clothing fabric",
+        "wool": "wool clothing fabric",
+        "leather": "leather clothing",
+        "suede": "suede clothing",
+        "knit": "knitted clothing fabric",
+        "linen": "linen clothing fabric",
+        "satin": "satin clothing fabric",
+        "silk": "silk clothing fabric",
+        "fleece": "fleece clothing fabric",
+        "velvet": "velvet clothing fabric",
+    },
+
+    "styles": {
+        "casual": "casual everyday clothing",
+        "smart": "smart well-dressed clothing",
+        "formal": "formal elegant clothing",
+        "sporty": "sporty athletic clothing",
+        "streetwear": "streetwear fashion clothing",
+        "vintage": "vintage retro fashion clothing",
+        "minimalist": "minimalist simple fashion clothing",
+        "party": "party going-out clothing",
+        "workwear": "professional workwear clothing",
+        "outdoors": "outdoor practical clothing",
+    },
+
+    "occasions": {
+        "everyday": "clothing for everyday wear",
+        "work": "clothing for work or the office",
+        "evening": "clothing for an evening out",
+        "party": "clothing for a party",
+        "wedding": "clothing to wear to a wedding",
+        "gym": "clothing for the gym",
+        "sports": "clothing for playing sports",
+        "holiday": "clothing for a holiday or vacation",
+        "beach": "clothing for the beach",
+        "outdoors": "clothing for outdoor activities",
+    },
+
+    "seasons": {
+        "spring": "clothing suitable for spring weather",
+        "summer": "clothing suitable for hot summer weather",
+        "autumn": "clothing suitable for autumn or fall weather",
+        "winter": "clothing suitable for cold winter weather",
+    },
+
+    "formalities": {
+        "casual": "casual informal clothing",
+        "smart_casual": "smart casual clothing",
+        "formal": "formal dressy clothing",
+    },
+}
+
+print("Loading FashionSigLIP...")
+OUTPUT_DIRECTORY = Path(
+    "app/src/main/assets/models"
+)
+
+OUTPUT_DIRECTORY.mkdir(
+    parents=True,
+    exist_ok=True
+)
+
 print("Loading FashionSigLIP...")
 
 model, _, _ = open_clip.create_model_and_transforms(
@@ -78,67 +157,86 @@ tokenizer = open_clip.get_tokenizer(
 
 model.eval()
 
-ids = list(clothing_types.keys())
-texts = list(clothing_types.values())
 
-tokens = tokenizer(texts)
+def encode_prompts(prompts):
+    ids = list(prompts.keys())
+    texts = list(prompts.values())
 
-with torch.no_grad():
-    embeddings = model.encode_text(
-        tokens,
-        normalize=True
-    )
+    tokens = tokenizer(texts)
 
-result = {}
+    with torch.no_grad():
+        embeddings = model.encode_text(
+            tokens,
+            normalize=True
+        )
 
-for clothing_id, embedding in zip(ids, embeddings):
-    result[clothing_id] = embedding.cpu().tolist()
+    return {
+        item_id: embedding.cpu().tolist()
+        for item_id, embedding
+        in zip(ids, embeddings)
+    }
 
-output_path = "app/src/main/assets/models/clothing_embeddings.json"
 
-with open(output_path, "w") as file:
-    json.dump(result, file)
-
-print(f"Wrote {len(result)} clothing embeddings")
-print(f"Embedding size: {len(next(iter(result.values())))}")
-print(f"Saved to: {output_path}")
-
-colour_ids = list(colours.keys())
-colour_texts = list(colours.values())
-
-colour_tokens = tokenizer(colour_texts)
-
-with torch.no_grad():
-    colour_embeddings = model.encode_text(
-        colour_tokens,
-        normalize=True
-    )
-
-colour_result = {}
-
-for colour_id, embedding in zip(
-    colour_ids,
-    colour_embeddings
+def write_embeddings(
+    filename,
+    embeddings
 ):
-    colour_result[colour_id] = (
-        embedding.cpu().tolist()
+    output_path = (
+        OUTPUT_DIRECTORY /
+        filename
     )
 
-colour_output_path = (
-    "app/src/main/assets/models/"
-    "colour_embeddings.json"
+    with output_path.open(
+        "w",
+        encoding="utf-8"
+    ) as file:
+        json.dump(
+            embeddings,
+            file
+        )
+
+    print(
+        f"Saved {filename}"
+    )
+
+
+clothing_embeddings = encode_prompts(
+    clothing_types
 )
 
-with open(colour_output_path, "w") as file:
-    json.dump(colour_result, file)
+write_embeddings(
+    "clothing_embeddings.json",
+    clothing_embeddings
+)
 
-print(
-    f"Wrote {len(colour_result)} colour embeddings"
+
+colour_embeddings = encode_prompts(
+    colours
 )
-print(
-    f"Colour embedding size: "
-    f"{len(next(iter(colour_result.values())))}"
+
+write_embeddings(
+    "colour_embeddings.json",
+    colour_embeddings
 )
-print(
-    f"Saved to: {colour_output_path}"
+
+
+semantic_embeddings = {}
+
+for category, prompts in (
+    semantic_vocabularies.items()
+):
+    print(
+        f"Generating {category}..."
+    )
+
+    semantic_embeddings[category] = (
+        encode_prompts(prompts)
+    )
+
+
+write_embeddings(
+    "semantic_embeddings.json",
+    semantic_embeddings
 )
+
+print("Done.")
