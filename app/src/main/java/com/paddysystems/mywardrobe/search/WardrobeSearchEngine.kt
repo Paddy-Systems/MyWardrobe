@@ -19,23 +19,6 @@ object WardrobeSearchEngine {
     private const val SEMANTIC_BASE_SCORE =
         20f
 
-    /*
-     * Low positive FashionSigLIP similarities can
-     * just be noise.
-     *
-     * Your T-shirt, for example:
-     *
-     * summer  = .043
-     * spring  = .027
-     * autumn  = .013
-     * winter  = .005
-     *
-     * So .015 is a sensible initial floor.
-     * We can tune this later from real wardrobe data.
-     */
-    private const val MIN_SEMANTIC_SIMILARITY =
-        0.015f
-
     fun search(
         items: List<WardrobeItem>,
         query: String
@@ -106,13 +89,10 @@ object WardrobeSearchEngine {
                 )
         }
 
-        semanticTags(item)
+        WardrobeSemanticSignals
+            .allStrongTags(item)
             .filter {
                 it.id == token
-            }
-            .filter {
-                it.similarity >=
-                        MIN_SEMANTIC_SIMILARITY
             }
             .forEach { tag ->
 
@@ -131,52 +111,6 @@ object WardrobeSearchEngine {
             }
 
         return bestScore
-    }
-
-    /*
-     * We intentionally only search the strongest
-     * three candidates from each semantic family.
-     *
-     * The metadata file keeps more candidates because
-     * they're useful for future ranking/outfit logic,
-     * but we don't want every weak prediction to make
-     * an item searchable.
-     */
-    private fun semanticTags(
-        item: WardrobeItem
-    ): List<SemanticTag> {
-
-        return buildList {
-            addAll(
-                item.metadata.patterns
-                    .take(3)
-            )
-
-            addAll(
-                item.metadata.materials
-                    .take(3)
-            )
-
-            addAll(
-                item.metadata.styles
-                    .take(3)
-            )
-
-            addAll(
-                item.metadata.occasions
-                    .take(3)
-            )
-
-            addAll(
-                item.metadata.seasons
-                    .take(3)
-            )
-
-            addAll(
-                item.metadata.formalities
-                    .take(3)
-            )
-        }
     }
 
     private fun canonicalizeQuery(

@@ -11,7 +11,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paddysystems.mywardrobe.ui.theme.MyWardrobeTheme
-import java.io.File
+import com.paddysystems.mywardrobe.search.WardrobeFilterEngine
+import com.paddysystems.mywardrobe.search.WardrobeFilters
+import com.paddysystems.mywardrobe.search.WardrobeSortEngine
+import com.paddysystems.mywardrobe.search.WardrobeSortOrder
+import com.paddysystems.mywardrobe.ui.components.WardrobeFilterDialog
+import com.paddysystems.mywardrobe.ui.components.WardrobeSortDialog
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -40,6 +45,26 @@ fun WardrobeScreen(
         mutableStateOf("")
     }
 
+    var filters by remember {
+        mutableStateOf(
+            WardrobeFilters()
+        )
+    }
+
+    var sortOrder by remember {
+        mutableStateOf(
+            WardrobeSortOrder.AUTO
+        )
+    }
+
+    var showFilterDialog by remember {
+        mutableStateOf(false)
+    }
+
+    var showSortDialog by remember {
+        mutableStateOf(false)
+    }
+
     val selectedItems = remember {
         mutableStateListOf<WardrobeItem>()
     }
@@ -56,21 +81,28 @@ fun WardrobeScreen(
         }
     }
 
+    val filteredItems =
+        WardrobeFilterEngine
+            .filter(
+                items = items,
+                filters = filters
+            )
+
+    val searchResults =
+        WardrobeSearchEngine
+            .search(
+                items = filteredItems,
+                query = searchQuery
+            )
+
     val visibleItems =
-        if (
-            searchQuery.isBlank()
-        ) {
-            items.toList()
-        } else {
-            WardrobeSearchEngine
-                .search(
-                    items = items,
-                    query = searchQuery
-                )
-                .map {
-                    it.item
-                }
-        }
+        WardrobeSortEngine
+            .sort(
+                results = searchResults,
+                sortOrder = sortOrder,
+                hasSearchQuery =
+                    searchQuery.isNotBlank()
+            )
 
     Column(
         modifier = modifier
@@ -96,16 +128,21 @@ fun WardrobeScreen(
         )
         WardrobeToolbar(
             searchQuery = searchQuery,
+
             onSearchQueryChange = { query ->
                 searchQuery = query
-
                 selectedItems.clear()
             },
+
+            activeFilterCount =
+                filters.activeCount,
+
             onFilterClick = {
-                //
+                showFilterDialog = true
             },
+
             onSortClick = {
-                //
+                showSortDialog = true
             }
         )
 
@@ -119,7 +156,7 @@ fun WardrobeScreen(
 
             emptyMessage =
                 if (
-                    searchQuery.isBlank()
+                    items.isEmpty()
                 ) {
                     "No items yet"
                 } else {
@@ -156,6 +193,52 @@ fun WardrobeScreen(
                 }
             }
         )
+
+        if (showFilterDialog) {
+            WardrobeFilterDialog(
+                filters = filters,
+
+                onApply = {
+                        updatedFilters ->
+
+                    filters =
+                        updatedFilters
+
+                    selectedItems.clear()
+
+                    showFilterDialog =
+                        false
+                },
+
+                onDismiss = {
+                    showFilterDialog =
+                        false
+                }
+            )
+        }
+
+        if (showSortDialog) {
+            WardrobeSortDialog(
+                selectedOrder =
+                    sortOrder,
+
+                onSelect = {
+                        order ->
+
+                    sortOrder = order
+
+                    selectedItems.clear()
+
+                    showSortDialog =
+                        false
+                },
+
+                onDismiss = {
+                    showSortDialog =
+                        false
+                }
+            )
+        }
 
         if (showDeleteConfirmation) {
             DeleteConfirmationDialog(

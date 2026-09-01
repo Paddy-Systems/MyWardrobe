@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.dp
 fun WardrobeToolbar(
     searchQuery: String,
     onSearchQueryChange: (String) -> Unit,
+    activeFilterCount: Int,
     onFilterClick: () -> Unit,
     onSortClick: () -> Unit,
     modifier: Modifier = Modifier
@@ -54,7 +55,15 @@ fun WardrobeToolbar(
                 contentColor = MaterialTheme.colorScheme.onSecondaryContainer
             )
         ) {
-            Text("Filter")
+            Text(
+                if (
+                    activeFilterCount > 0
+                ) {
+                    "Filter ($activeFilterCount)"
+                } else {
+                    "Filter"
+                }
+            )
         }
 
         Button(

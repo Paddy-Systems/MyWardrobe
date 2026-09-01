@@ -11,24 +11,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import com.paddysystems.mywardrobe.data.model.wardrobeColours
 
-private val availableColours = listOf(
-    "black",
-    "white",
-    "grey",
-    "blue",
-    "navy",
-    "red",
-    "green",
-    "yellow",
-    "orange",
-    "pink",
-    "purple",
-    "brown",
-    "beige",
-    "cream",
-    "teal"
-)
 
 @Composable
 fun ColourSelector(
@@ -49,7 +33,7 @@ fun ColourSelector(
                 vertical = 8.dp
             )
         ) {
-            items(availableColours) { colour ->
+            items(wardrobeColours) { colour ->
                 val selected =
                     colour in selectedColours
 
