@@ -30,6 +30,8 @@ import com.paddysystems.mywardrobe.ui.screens.createoutfit.shuffleOutfitLayer
 @Composable
 fun OutfitLayerEditor(
     layer: OutfitLayer,
+    layerNumber: Int,
+    layerCount: Int,
     topItems: List<WardrobeItem>,
     bottomItems: List<WardrobeItem>,
     fullLengthItems:
@@ -62,7 +64,8 @@ fun OutfitLayerEditor(
         modifier = modifier
     ) {
         Text(
-            text = "Layer 1",
+            text =
+                "Layer $layerNumber of $layerCount",
 
             style =
                 MaterialTheme
@@ -464,6 +467,56 @@ fun OutfitLayerEditor(
                     }
                 }
             }
+        }
+
+        Spacer(
+            modifier =
+                Modifier.height(12.dp)
+        )
+
+        val canShuffle =
+            when (layer.mode) {
+
+                OutfitLayerMode.SEPARATES ->
+                    (
+                            !layer.top.isLocked &&
+                                    topItems.isNotEmpty()
+                            ) ||
+                            (
+                                    !layer.bottom.isLocked &&
+                                            bottomItems.isNotEmpty()
+                                    )
+
+                OutfitLayerMode.FULL_LENGTH ->
+                    !layer.fullLength.isLocked &&
+                            fullLengthItems.isNotEmpty()
+            }
+
+        Button(
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            enabled =
+                canShuffle,
+
+            onClick = {
+                onLayerChange(
+                    shuffleOutfitLayer(
+                        layer = layer,
+
+                        topItems =
+                            topItems,
+
+                        bottomItems =
+                            bottomItems,
+
+                        fullLengthItems =
+                            fullLengthItems
+                    )
+                )
+            }
+        ) {
+            Text("Shuffle")
         }
     }
 }
