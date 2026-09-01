@@ -9,6 +9,9 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.ui.unit.dp
 
 @Composable
 fun SaveOutfitDialog(
@@ -29,7 +32,7 @@ fun SaveOutfitDialog(
             onDismiss,
 
         title = {
-            Text("Save Outfit")
+            Text("Name this look", style = MaterialTheme.typography.headlineMedium)
         },
 
         text = {
@@ -70,6 +73,8 @@ fun SaveOutfitDialog(
             ) {
                 Text("Cancel")
             }
-        }
+        },
+        shape = RoundedCornerShape(28.dp),
+        containerColor = MaterialTheme.colorScheme.background
     )
 }

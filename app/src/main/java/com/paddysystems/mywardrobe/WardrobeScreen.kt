@@ -32,6 +32,8 @@ import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
 import com.paddysystems.mywardrobe.data.storage.deleteWardrobeItem
 import com.paddysystems.mywardrobe.search.WardrobeSearchEngine
 import com.paddysystems.mywardrobe.ui.components.WardrobeActiveControls
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.foundation.background
 
 @Composable
 fun WardrobeScreen(
@@ -112,7 +114,8 @@ fun WardrobeScreen(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .padding(16.dp)
+            .background(MaterialTheme.colorScheme.background)
+            .padding(horizontal = 20.dp, vertical = 22.dp)
     ) {
         WardrobeHeader(
             itemCount =
@@ -168,7 +171,7 @@ fun WardrobeScreen(
 
         Spacer(
             modifier =
-                Modifier.height(8.dp)
+                Modifier.height(14.dp)
         )
 
         if (hasActiveControls) {

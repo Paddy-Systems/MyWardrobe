@@ -4,6 +4,7 @@ import android.net.Uri
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -24,10 +25,9 @@ fun ItemImagePreview(
         contentScale = ContentScale.Fit,
         modifier = modifier
             .fillMaxWidth()
-            .height(260.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(
-                MaterialTheme.colorScheme.surfaceVariant
-            )
+            .height(300.dp)
+            .clip(RoundedCornerShape(26.dp))
+            .background(MaterialTheme.colorScheme.surface)
+            .padding(18.dp)
     )
 }

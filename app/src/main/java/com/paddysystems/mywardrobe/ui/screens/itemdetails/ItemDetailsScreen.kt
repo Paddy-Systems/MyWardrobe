@@ -26,6 +26,12 @@ import com.paddysystems.mywardrobe.data.model.wardrobeLabel
 import com.paddysystems.mywardrobe.ui.screens.itemdetails.components.SemanticMetadataSection
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import androidx.compose.foundation.background
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.Edit
+import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
+import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 
 @Composable
 fun ItemDetailsScreen(
@@ -85,100 +91,52 @@ fun ItemDetailsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(
                 rememberScrollState()
             )
-            .padding(16.dp)
+            .padding(horizontal = 20.dp, vertical = 22.dp)
     ) {
-        Text("Item Details")
+        EditorialPageHeader(
+            eyebrow = "Wardrobe piece",
+            title = clothingTypeName,
+            subtitle = "Your saved styling details",
+            navigationIcon = Icons.Outlined.ArrowBack,
+            onNavigate = onBack
+        )
 
         Spacer(
             modifier = Modifier.height(16.dp)
         )
 
-        AsyncImage(
-            model = File(item.imagePath),
-            contentDescription = "Wardrobe item",
-            contentScale = ContentScale.Fit,
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(300.dp)
-                .clip(
-                    RoundedCornerShape(16.dp)
-                )
-        )
-
-        if (cutoutFile != null) {
-
-            Spacer(
-                modifier =
-                    Modifier.height(16.dp)
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(26.dp),
+            color = MaterialTheme.colorScheme.surface
+        ) {
+            AsyncImage(
+                model = cutoutFile ?: File(item.imagePath),
+                contentDescription = "Wardrobe item",
+                contentScale = ContentScale.Fit,
+                modifier = Modifier.fillMaxWidth().height(340.dp).padding(18.dp)
             )
-
-            Text(
-                "Transparent cut-out"
-            )
-
-            Spacer(
-                modifier =
-                    Modifier.height(8.dp)
-            )
-
-            Surface(
-                modifier =
-                    Modifier.fillMaxWidth(),
-
-                color =
-                    MaterialTheme
-                        .colorScheme
-                        .surfaceVariant,
-
-                shape =
-                    RoundedCornerShape(
-                        16.dp
-                    )
-            ) {
-
-                AsyncImage(
-                    model =
-                        cutoutFile,
-
-                    contentDescription =
-                        "Transparent clothing cut-out",
-
-                    contentScale =
-                        ContentScale.Fit,
-
-                    modifier =
-                        Modifier
-                            .fillMaxWidth()
-                            .height(
-                                300.dp
-                            )
-                            .padding(
-                                12.dp
-                            )
-                )
-            }
         }
 
         Spacer(
             modifier = Modifier.height(16.dp)
         )
-
-        Text(
-            "Type: $clothingTypeName"
-        )
-
-        Text(
-            text =
-                "Colours: ${
-                    item.colours
-                        .joinToString {
-                            wardrobeLabel(it)
-                        }
-                }"
-        )
+        Surface(shape = RoundedCornerShape(20.dp), color = MaterialTheme.colorScheme.surface) {
+            Column(Modifier.fillMaxWidth().padding(18.dp)) {
+                Text("AT A GLANCE", style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(10.dp))
+                Text(clothingTypeName, style = MaterialTheme.typography.titleLarge)
+                Text(
+                    item.colours.joinToString("  ·  ") { wardrobeLabel(it) },
+                    style = MaterialTheme.typography.bodyLarge,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
 
         Spacer(
             modifier =
@@ -199,24 +157,11 @@ fun ItemDetailsScreen(
             modifier = Modifier.height(24.dp)
         )
 
-        Button(
+        EditorialPrimaryButton(
+            text = "Edit item",
+            icon = Icons.Outlined.Edit,
             modifier = Modifier.fillMaxWidth(),
             onClick = onEdit
-        ) {
-            Text("Edit item")
-        }
-
-        Spacer(
-            modifier = Modifier.height(12.dp)
         )
-
-        Button(
-            modifier =
-                Modifier.fillMaxWidth(),
-
-            onClick = onBack
-        ) {
-            Text("Back")
-        }
     }
 }

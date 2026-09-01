@@ -58,7 +58,7 @@ fun OutfitItemPickerDialog(
             onDismiss,
 
         title = {
-            Text(title)
+            Text(title, style = MaterialTheme.typography.headlineMedium)
         },
 
         text = {
@@ -136,7 +136,7 @@ fun OutfitItemPickerDialog(
                             color =
                                 MaterialTheme
                                     .colorScheme
-                                    .surfaceVariant
+                                    .surface
                         ) {
                             Column(
                                 modifier =
@@ -202,6 +202,8 @@ fun OutfitItemPickerDialog(
             ) {
                 Text("Cancel")
             }
-        }
+        },
+        shape = RoundedCornerShape(28.dp),
+        containerColor = MaterialTheme.colorScheme.background
     )
 }

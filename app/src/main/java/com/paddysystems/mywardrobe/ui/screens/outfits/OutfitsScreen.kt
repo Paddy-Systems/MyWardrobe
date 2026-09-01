@@ -21,10 +21,20 @@ import androidx.compose.ui.unit.dp
 import com.paddysystems.mywardrobe.data.storage.loadOutfits
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
 import com.paddysystems.mywardrobe.ui.screens.outfits.components.OutfitThumbnail
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.height
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.Add
+import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
+import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 
 @Composable
 fun OutfitsScreen(
-    refreshKey: Int = 0
+    refreshKey: Int = 0,
+    onCreateOutfit: () -> Unit = {}
 ) {
     val context =
         LocalContext.current
@@ -48,36 +58,35 @@ fun OutfitsScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(
-                top = 16.dp
-            )
+            .background(MaterialTheme.colorScheme.background)
+            .padding(top = 22.dp)
     ) {
-
-        Text(
-            text = "Saved Outfits",
-
-            style =
-                MaterialTheme
-                    .typography
-                    .headlineMedium,
-
-            modifier =
-                Modifier.padding(
-                    horizontal = 16.dp
-                )
+        EditorialPageHeader(
+            eyebrow = "Your lookbook",
+            title = "Saved outfits",
+            subtitle = if (outfits.isEmpty()) "A home for combinations worth repeating." else "${outfits.size} looks, ready when you are.",
+            modifier = Modifier.padding(horizontal = 20.dp)
+        )
+        Spacer(Modifier.height(16.dp))
+        EditorialPrimaryButton(
+            text = "Build a new look",
+            icon = Icons.Outlined.Add,
+            onClick = onCreateOutfit,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 20.dp)
         )
 
         if (outfits.isEmpty()) {
 
-            Text(
-                text =
-                    "No saved outfits yet",
-
-                modifier =
-                    Modifier.padding(
-                        16.dp
-                    )
-            )
+            Surface(
+                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                shape = RoundedCornerShape(24.dp),
+                color = MaterialTheme.colorScheme.surface
+            ) {
+                Column(Modifier.padding(24.dp)) {
+                    Text("Your first look starts here", style = MaterialTheme.typography.titleLarge)
+                    Text("Choose a top, bottom and finishing pieces from your wardrobe.", color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
+            }
 
         } else {
 
@@ -87,7 +96,7 @@ fun OutfitsScreen(
 
                 contentPadding =
                     PaddingValues(
-                        12.dp
+                        14.dp
                     )
             ) {
                 items(
@@ -111,7 +120,7 @@ fun OutfitsScreen(
                             ),
 
                         tonalElevation =
-                            2.dp
+                            1.dp
                     ) {
                         Column {
 

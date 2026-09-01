@@ -48,6 +48,16 @@ import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.SaveOutfit
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import androidx.compose.foundation.background
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material.icons.outlined.Save
+import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
+import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
+import com.paddysystems.mywardrobe.ui.components.EditorialSecondaryButton
 
 @Composable
 fun CreateOutfitScreen(
@@ -257,21 +267,19 @@ fun CreateOutfitScreen(
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .background(MaterialTheme.colorScheme.background)
             .verticalScroll(
                 rememberScrollState()
             )
             .padding(
-                vertical = 16.dp
+                vertical = 22.dp
             )
     ) {
-
-        Text(
-            text = "Create Outfit",
-
-            modifier =
-                Modifier.padding(
-                    horizontal = 16.dp
-                )
+        EditorialPageHeader(
+            eyebrow = "Outfit studio",
+            title = "Build a look",
+            subtitle = "Mix, layer and lock the pieces you love.",
+            modifier = Modifier.padding(horizontal = 20.dp)
         )
 
         Spacer(
@@ -282,13 +290,14 @@ fun CreateOutfitScreen(
         /*
          * Layers / Stacked toggle
          */
-        Row(
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(
-                    horizontal = 16.dp
-                )
+                .padding(horizontal = 20.dp),
+            shape = RoundedCornerShape(18.dp),
+            color = MaterialTheme.colorScheme.surface
         ) {
+        Row(modifier = Modifier.padding(6.dp)) {
 
             if (!showStackedView) {
                 Button(
@@ -340,6 +349,7 @@ fun CreateOutfitScreen(
                     Text("Stacked")
                 }
             }
+        }
         }
 
         Spacer(
@@ -400,7 +410,7 @@ fun CreateOutfitScreen(
 
                 contentPadding =
                     PaddingValues(
-                        horizontal = 52.dp
+                        horizontal = 36.dp
                     ),
 
                 pageSpacing =
@@ -409,7 +419,7 @@ fun CreateOutfitScreen(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(
-                        680.dp
+                        650.dp
                     )
             ) { page ->
 
@@ -516,19 +526,20 @@ fun CreateOutfitScreen(
                     )
             ) {
 
-                OutlinedButton(
+                EditorialSecondaryButton(
+                    text = "Remove layer",
                     modifier =
                         Modifier.weight(1f),
 
                     enabled =
                         layers.size > 1,
 
-                    onClick = {
+                    onClick = removeLayer@ {
 
                         if (
                             layers.size <= 1
                         ) {
-                            return@OutlinedButton
+                            return@removeLayer
                         }
 
                         val index =
@@ -555,16 +566,15 @@ fun CreateOutfitScreen(
                                 updated.lastIndex
                             )
                     }
-                ) {
-                    Text("Remove layer")
-                }
+                )
 
                 Spacer(
                     modifier =
                         Modifier.width(8.dp)
                 )
 
-                Button(
+                EditorialPrimaryButton(
+                    text = "Add layer",
                     modifier =
                         Modifier.weight(1f),
 
@@ -592,9 +602,7 @@ fun CreateOutfitScreen(
                         requestedPage =
                             newPage
                     }
-                ) {
-                    Text("+ Add layer")
-                }
+                )
             }
         }
 
@@ -916,7 +924,9 @@ fun CreateOutfitScreen(
                                 accessoryItems.isNotEmpty()
                     }
 
-        Button(
+        EditorialSecondaryButton(
+            text = "Shuffle the look",
+            icon = Icons.Outlined.AutoAwesome,
             modifier =
                 Modifier.fillMaxWidth(),
 
@@ -963,16 +973,16 @@ fun CreateOutfitScreen(
                         )
                     }
             }
-        ) {
-            Text("Shuffle whole outfit")
-        }
+        )
 
         Spacer(
             modifier =
                 Modifier.height(12.dp)
         )
 
-        Button(
+        EditorialPrimaryButton(
+            text = if (isSaving) "Saving…" else "Save outfit",
+            icon = Icons.Outlined.Save,
             modifier =
                 Modifier.fillMaxWidth(),
 
@@ -984,15 +994,7 @@ fun CreateOutfitScreen(
                 saveError = null
                 showSaveDialog = true
             }
-        ) {
-            Text(
-                if (isSaving) {
-                    "Saving..."
-                } else {
-                    "Save Outfit"
-                }
-            )
-        }
+        )
 
         saveError?.let {
             Text(

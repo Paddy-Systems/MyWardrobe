@@ -8,6 +8,8 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -24,7 +26,9 @@ fun ColourSelector(
         modifier = modifier.fillMaxWidth()
     ) {
         Text(
-            "Colours (${selectedColours.size}/3)"
+            "COLOURS  ·  ${selectedColours.size}/3",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary
         )
 
         LazyRow(
@@ -61,7 +65,11 @@ fun ColourSelector(
                                 it.uppercase()
                             }
                         )
-                    }
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
                 )
             }
         }

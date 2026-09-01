@@ -313,7 +313,7 @@ fun updateWardrobeItem(
     return try {
         val json =
             wardrobeItemToJson(
-                item
+                updatedItem
             )
 
         itemFile.writeText(
