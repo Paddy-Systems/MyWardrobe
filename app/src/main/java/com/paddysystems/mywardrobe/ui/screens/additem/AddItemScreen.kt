@@ -32,6 +32,7 @@ import com.paddysystems.mywardrobe.ml.FashionSigLipEncoder
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import com.paddysystems.mywardrobe.ml.ClothingEmbeddingMatcher
+import com.paddysystems.mywardrobe.ml.ColourEmbeddingMatcher
 
 @Composable
 fun AddItemScreen(
@@ -60,6 +61,13 @@ fun AddItemScreen(
         }
     }
 
+    var predictedClothingTypeId by remember {
+        mutableStateOf<String?>(null)
+    }
+
+    var predictedColours by remember {
+        mutableStateOf<List<String>>(emptyList())
+    }
 
     val cameraLauncher = rememberLauncherForActivityResult(
         contract = TakePicture()
@@ -122,30 +130,51 @@ fun AddItemScreen(
                         ?: return@LaunchedEffect
 
                     try {
-                        val matches = withContext(Dispatchers.IO) {
-                            val encoder = FashionSigLipEncoder(
-                                context.applicationContext
-                            )
+                        val (clothingMatches, colourMatches) =
+                            withContext(Dispatchers.IO) {
+                                val encoder = FashionSigLipEncoder(
+                                    context.applicationContext
+                                )
 
-                            val embedding = encoder.encode(
-                                imageUri
-                            )
+                                val embedding = encoder.encode(imageUri)
 
-                            val matcher = ClothingEmbeddingMatcher(
-                                context.applicationContext
-                            )
+                                val clothingMatcher = ClothingEmbeddingMatcher(
+                                    context.applicationContext
+                                )
 
-                            matcher.topMatches(
-                                imageEmbedding = embedding,
-                                limit = 5
-                            )
-                        }
+                                val colourMatcher = ColourEmbeddingMatcher(
+                                    context.applicationContext
+                                )
+
+                                Pair(
+                                    clothingMatcher.topMatches(
+                                        embedding,
+                                        5
+                                    ),
+                                    colourMatcher.topMatches(
+                                        embedding,
+                                        5
+                                    )
+                                )
+                            }
                         Log.d(
                             "FashionSigLIP",
                             buildString {
                                 appendLine("Top clothing matches:")
 
-                                matches.forEach { match ->
+                                clothingMatches.forEach { match ->
+                                    appendLine(
+                                        "${match.id}: ${match.similarity}"
+                                    )
+                                }
+                            }
+                        )
+                        Log.d(
+                            "FashionSigLIP",
+                            buildString {
+                                appendLine("Top colour matches:")
+
+                                colourMatches.forEach { match ->
                                     appendLine(
                                         "${match.id}: ${match.similarity}"
                                     )
