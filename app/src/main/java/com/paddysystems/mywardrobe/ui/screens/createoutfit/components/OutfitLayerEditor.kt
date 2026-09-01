@@ -23,6 +23,9 @@ import com.paddysystems.mywardrobe.data.model.OutfitLayerMode
 import com.paddysystems.mywardrobe.data.model.OutfitPlacement
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import com.paddysystems.mywardrobe.ui.screens.createoutfit.cycleOutfitItem
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.width
+import com.paddysystems.mywardrobe.ui.screens.createoutfit.shuffleOutfitLayer
 
 @Composable
 fun OutfitLayerEditor(
@@ -154,7 +157,7 @@ fun OutfitLayerEditor(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .height(480.dp),
+                .height(500.dp),
 
             shape =
                 RoundedCornerShape(
@@ -169,342 +172,297 @@ fun OutfitLayerEditor(
                         alpha = 0.45f
                     )
         ) {
-            Box {
+            Box(
+                modifier =
+                    Modifier.fillMaxSize()
+            ) {
                 OutfitSilhouette(
                     modifier = Modifier
                         .matchParentSize()
                         .padding(
-                            horizontal =
-                                52.dp,
-
-                            vertical =
-                                20.dp
+                            horizontal = 52.dp,
+                            vertical = 20.dp
                         )
                 )
 
                 when (layer.mode) {
 
-                    OutfitLayerMode
-                        .SEPARATES -> {
+                    OutfitLayerMode.SEPARATES -> {
 
-                        topItem?.let { item ->
-                            OutfitGarmentImage(
-                                item = item,
+                        OutfitSlotOverlay(
+                            item = topItem,
 
-                                modifier =
-                                    Modifier
-                                        .align(
-                                            Alignment
-                                                .TopCenter
-                                        )
-                                        .padding(
-                                            top =
-                                                50.dp
-                                        )
-                                        .fillMaxWidth(
-                                            0.80f
-                                        )
-                                        .height(
-                                            225.dp
-                                        )
-                            )
-                        }
+                            isLocked =
+                                layer.top.isLocked,
 
-                        bottomItem
-                            ?.let { item ->
+                            hasItems =
+                                topItems.isNotEmpty(),
 
-                                OutfitGarmentImage(
-                                    item = item,
+                            onPrevious = {
+                                onLayerChange(
+                                    layer.copy(
+                                        top =
+                                            layer.top.copy(
+                                                itemId =
+                                                    cycleOutfitItem(
+                                                        currentItemId =
+                                                            layer
+                                                                .top
+                                                                .itemId,
 
-                                    modifier =
-                                        Modifier
-                                            .align(
-                                                Alignment
-                                                    .BottomCenter
+                                                        items =
+                                                            topItems,
+
+                                                        direction =
+                                                            -1
+                                                    )
                                             )
-                                            .padding(
-                                                bottom =
-                                                    30.dp
-                                            )
-                                            .fillMaxWidth(
-                                                0.72f
-                                            )
-                                            .height(
-                                                275.dp
-                                            )
+                                    )
                                 )
-                            }
+                            },
+
+                            onNext = {
+                                onLayerChange(
+                                    layer.copy(
+                                        top =
+                                            layer.top.copy(
+                                                itemId =
+                                                    cycleOutfitItem(
+                                                        currentItemId =
+                                                            layer
+                                                                .top
+                                                                .itemId,
+
+                                                        items =
+                                                            topItems,
+
+                                                        direction =
+                                                            1
+                                                    )
+                                            )
+                                    )
+                                )
+                            },
+
+                            onToggleLock = {
+                                onLayerChange(
+                                    layer.copy(
+                                        top =
+                                            layer.top.copy(
+                                                isLocked =
+                                                    !layer
+                                                        .top
+                                                        .isLocked
+                                            )
+                                    )
+                                )
+                            },
+
+                            onSearch = {
+                                onSearch(
+                                    OutfitPlacement.TOP
+                                )
+                            },
+
+                            modifier = Modifier
+                                .align(
+                                    Alignment.TopCenter
+                                )
+                                .padding(
+                                    top = 38.dp
+                                )
+                                .fillMaxWidth()
+                                .height(215.dp)
+                        )
+
+                        OutfitSlotOverlay(
+                            item =
+                                bottomItem,
+
+                            isLocked =
+                                layer.bottom
+                                    .isLocked,
+
+                            hasItems =
+                                bottomItems
+                                    .isNotEmpty(),
+
+                            onPrevious = {
+                                onLayerChange(
+                                    layer.copy(
+                                        bottom =
+                                            layer.bottom.copy(
+                                                itemId =
+                                                    cycleOutfitItem(
+                                                        currentItemId =
+                                                            layer
+                                                                .bottom
+                                                                .itemId,
+
+                                                        items =
+                                                            bottomItems,
+
+                                                        direction =
+                                                            -1
+                                                    )
+                                            )
+                                    )
+                                )
+                            },
+
+                            onNext = {
+                                onLayerChange(
+                                    layer.copy(
+                                        bottom =
+                                            layer.bottom.copy(
+                                                itemId =
+                                                    cycleOutfitItem(
+                                                        currentItemId =
+                                                            layer
+                                                                .bottom
+                                                                .itemId,
+
+                                                        items =
+                                                            bottomItems,
+
+                                                        direction =
+                                                            1
+                                                    )
+                                            )
+                                    )
+                                )
+                            },
+
+                            onToggleLock = {
+                                onLayerChange(
+                                    layer.copy(
+                                        bottom =
+                                            layer.bottom.copy(
+                                                isLocked =
+                                                    !layer
+                                                        .bottom
+                                                        .isLocked
+                                            )
+                                    )
+                                )
+                            },
+
+                            onSearch = {
+                                onSearch(
+                                    OutfitPlacement
+                                        .BOTTOM
+                                )
+                            },
+
+                            modifier = Modifier
+                                .align(
+                                    Alignment
+                                        .BottomCenter
+                                )
+                                .padding(
+                                    bottom = 18.dp
+                                )
+                                .fillMaxWidth()
+                                .height(265.dp)
+                        )
                     }
 
-                    OutfitLayerMode
-                        .FULL_LENGTH -> {
+                    OutfitLayerMode.FULL_LENGTH -> {
 
-                        fullLengthItem
-                            ?.let { item ->
+                        OutfitSlotOverlay(
+                            item =
+                                fullLengthItem,
 
-                                OutfitGarmentImage(
-                                    item = item,
+                            isLocked =
+                                layer
+                                    .fullLength
+                                    .isLocked,
 
-                                    modifier =
-                                        Modifier
-                                            .align(
-                                                Alignment
-                                                    .Center
-                                            )
-                                            .fillMaxWidth(
-                                                0.82f
-                                            )
-                                            .fillMaxHeight(
-                                                0.90f
-                                            )
-                                            .padding(
-                                                vertical =
-                                                    16.dp
-                                            )
+                            hasItems =
+                                fullLengthItems
+                                    .isNotEmpty(),
+
+                            onPrevious = {
+                                onLayerChange(
+                                    layer.copy(
+                                        fullLength =
+                                            layer
+                                                .fullLength
+                                                .copy(
+                                                    itemId =
+                                                        cycleOutfitItem(
+                                                            currentItemId =
+                                                                layer
+                                                                    .fullLength
+                                                                    .itemId,
+
+                                                            items =
+                                                                fullLengthItems,
+
+                                                            direction =
+                                                                -1
+                                                        )
+                                                )
+                                    )
                                 )
-                            }
+                            },
+
+                            onNext = {
+                                onLayerChange(
+                                    layer.copy(
+                                        fullLength =
+                                            layer
+                                                .fullLength
+                                                .copy(
+                                                    itemId =
+                                                        cycleOutfitItem(
+                                                            currentItemId =
+                                                                layer
+                                                                    .fullLength
+                                                                    .itemId,
+
+                                                            items =
+                                                                fullLengthItems,
+
+                                                            direction =
+                                                                1
+                                                        )
+                                                )
+                                    )
+                                )
+                            },
+
+                            onToggleLock = {
+                                onLayerChange(
+                                    layer.copy(
+                                        fullLength =
+                                            layer
+                                                .fullLength
+                                                .copy(
+                                                    isLocked =
+                                                        !layer
+                                                            .fullLength
+                                                            .isLocked
+                                                )
+                                    )
+                                )
+                            },
+
+                            onSearch = {
+                                onSearch(
+                                    OutfitPlacement
+                                        .FULL_LENGTH
+                                )
+                            },
+
+                            modifier = Modifier
+                                .matchParentSize()
+                                .padding(
+                                    vertical = 24.dp
+                                )
+                        )
                     }
                 }
-            }
-        }
-
-        Spacer(
-            modifier =
-                Modifier.height(12.dp)
-        )
-
-        when (layer.mode) {
-
-            OutfitLayerMode
-                .SEPARATES -> {
-
-                OutfitSlotControls(
-                    label = "Top",
-                    item = topItem,
-                    isLocked =
-                        layer.top.isLocked,
-                    hasItems =
-                        topItems.isNotEmpty(),
-
-                    onPrevious = {
-                        onLayerChange(
-                            layer.copy(
-                                top =
-                                    layer.top.copy(
-                                        itemId =
-                                            cycleOutfitItem(
-                                                currentItemId =
-                                                    layer
-                                                        .top
-                                                        .itemId,
-
-                                                items =
-                                                    topItems,
-
-                                                direction =
-                                                    -1
-                                            )
-                                    )
-                            )
-                        )
-                    },
-
-                    onNext = {
-                        onLayerChange(
-                            layer.copy(
-                                top =
-                                    layer.top.copy(
-                                        itemId =
-                                            cycleOutfitItem(
-                                                currentItemId =
-                                                    layer
-                                                        .top
-                                                        .itemId,
-
-                                                items =
-                                                    topItems,
-
-                                                direction =
-                                                    1
-                                            )
-                                    )
-                            )
-                        )
-                    },
-
-                    onToggleLock = {
-                        onLayerChange(
-                            layer.copy(
-                                top =
-                                    layer.top.copy(
-                                        isLocked =
-                                            !layer
-                                                .top
-                                                .isLocked
-                                    )
-                            )
-                        )
-                    },
-
-                    onSearch = {
-                        onSearch(
-                            OutfitPlacement.TOP
-                        )
-                    }
-                )
-
-                OutfitSlotControls(
-                    label = "Bottom",
-                    item = bottomItem,
-                    isLocked =
-                        layer.bottom
-                            .isLocked,
-                    hasItems =
-                        bottomItems
-                            .isNotEmpty(),
-
-                    onPrevious = {
-                        onLayerChange(
-                            layer.copy(
-                                bottom =
-                                    layer.bottom.copy(
-                                        itemId =
-                                            cycleOutfitItem(
-                                                layer.bottom
-                                                    .itemId,
-
-                                                bottomItems,
-
-                                                -1
-                                            )
-                                    )
-                            )
-                        )
-                    },
-
-                    onNext = {
-                        onLayerChange(
-                            layer.copy(
-                                bottom =
-                                    layer.bottom.copy(
-                                        itemId =
-                                            cycleOutfitItem(
-                                                layer.bottom
-                                                    .itemId,
-
-                                                bottomItems,
-
-                                                1
-                                            )
-                                    )
-                            )
-                        )
-                    },
-
-                    onToggleLock = {
-                        onLayerChange(
-                            layer.copy(
-                                bottom =
-                                    layer.bottom.copy(
-                                        isLocked =
-                                            !layer
-                                                .bottom
-                                                .isLocked
-                                    )
-                            )
-                        )
-                    },
-
-                    onSearch = {
-                        onSearch(
-                            OutfitPlacement.BOTTOM
-                        )
-                    }
-                )
-            }
-
-            OutfitLayerMode
-                .FULL_LENGTH -> {
-
-                OutfitSlotControls(
-                    label =
-                        "Full Length",
-
-                    item =
-                        fullLengthItem,
-
-                    isLocked =
-                        layer.fullLength
-                            .isLocked,
-
-                    hasItems =
-                        fullLengthItems
-                            .isNotEmpty(),
-
-                    onPrevious = {
-                        onLayerChange(
-                            layer.copy(
-                                fullLength =
-                                    layer.fullLength
-                                        .copy(
-                                            itemId =
-                                                cycleOutfitItem(
-                                                    layer
-                                                        .fullLength
-                                                        .itemId,
-
-                                                    fullLengthItems,
-
-                                                    -1
-                                                )
-                                        )
-                            )
-                        )
-                    },
-
-                    onNext = {
-                        onLayerChange(
-                            layer.copy(
-                                fullLength =
-                                    layer.fullLength
-                                        .copy(
-                                            itemId =
-                                                cycleOutfitItem(
-                                                    layer
-                                                        .fullLength
-                                                        .itemId,
-
-                                                    fullLengthItems,
-
-                                                    1
-                                                )
-                                        )
-                            )
-                        )
-                    },
-
-                    onToggleLock = {
-                        onLayerChange(
-                            layer.copy(
-                                fullLength =
-                                    layer.fullLength
-                                        .copy(
-                                            isLocked =
-                                                !layer
-                                                    .fullLength
-                                                    .isLocked
-                                        )
-                            )
-                        )
-                    },
-
-                    onSearch = {
-                        onSearch(
-                            OutfitPlacement
-                                .FULL_LENGTH
-                        )
-                    }
-                )
             }
         }
     }
