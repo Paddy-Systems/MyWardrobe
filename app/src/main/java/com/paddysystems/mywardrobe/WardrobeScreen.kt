@@ -40,7 +40,11 @@ import androidx.compose.runtime.setValue
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.OutlinedTextFieldDefaults
-import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.border
+import androidx.compose.foundation.combinedClickable
+
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.TextButton
 
 @Composable
 fun WardrobeScreen(modifier: Modifier = Modifier) {
@@ -48,6 +52,14 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
 
     var searchQuery by remember {
         mutableStateOf("")
+    }
+
+    val selectedImages = remember {
+        mutableStateListOf<File>()
+    }
+
+    var showDeleteConfirmation by remember {
+        mutableStateOf(false)
     }
 
     val images = remember {
@@ -74,9 +86,49 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
             .padding(16.dp)
     ) {
         Text(
-            text = "My Wardrobe · ${images.size} items",
+            text = if (selectedImages.isEmpty()) {
+                "My Wardrobe · ${images.size} items"
+            } else {
+                "${selectedImages.size} selected"
+            },
             style = MaterialTheme.typography.headlineLarge
         )
+        if (selectedImages.isNotEmpty()) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        selectedImages.clear()
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                ) {
+                    Text("Cancel")
+                }
+
+                Button(
+                    modifier = Modifier.weight(1f),
+                    onClick = {
+                        showDeleteConfirmation = true
+                    },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = MaterialTheme.colorScheme.error,
+                        contentColor = MaterialTheme.colorScheme.onError
+                    )
+                ) {
+                    Text("Delete ${selectedImages.size}")
+                }
+            }
+
+            Spacer(
+                modifier = Modifier.height(8.dp)
+            )
+        }
         Spacer(
             modifier = Modifier.height(12.dp)
         )
@@ -153,17 +205,90 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 items(images) { imageFile ->
+                    val isSelected = selectedImages.contains(imageFile)
+
                     AsyncImage(
                         model = imageFile,
                         contentDescription = "Wardrobe item",
                         modifier = Modifier
                             .fillMaxWidth()
                             .aspectRatio(1f)
-                            .clip(RoundedCornerShape(12.dp)),
+                            .clip(RoundedCornerShape(12.dp))
+                            .then(
+                                if (isSelected) {
+                                    Modifier.border(
+                                        width = 3.dp,
+                                        color = MaterialTheme.colorScheme.primary,
+                                        shape = RoundedCornerShape(12.dp)
+                                    )
+                                } else {
+                                    Modifier
+                                }
+                            )
+                            .combinedClickable(
+                                onClick = {
+                                    if (selectedImages.isNotEmpty()) {
+                                        if (isSelected) {
+                                            selectedImages.remove(imageFile)
+                                        } else {
+                                            selectedImages.add(imageFile)
+                                        }
+                                    }
+                                },
+                                onLongClick = {
+                                    if (isSelected) {
+                                        selectedImages.remove(imageFile)
+                                    } else {
+                                        selectedImages.add(imageFile)
+                                    }
+                                }
+                            ),
                         contentScale = ContentScale.Crop
                     )
                 }
             }
+        }
+        if (showDeleteConfirmation) {
+            AlertDialog(
+                onDismissRequest = {
+                    showDeleteConfirmation = false
+                },
+                title = {
+                    Text("Remove ${selectedImages.size} items?")
+                },
+                text = {
+                    Text(
+                        "This will permanently remove ${selectedImages.size} items from your wardrobe."
+                    )
+                },
+                confirmButton = {
+                    TextButton(
+                        onClick = {
+                            val imagesToDelete = selectedImages.toList()
+
+                            imagesToDelete.forEach { imageFile ->
+                                if (deleteImage(imageFile)) {
+                                    images.remove(imageFile)
+                                }
+                            }
+
+                            selectedImages.clear()
+                            showDeleteConfirmation = false
+                        }
+                    ) {
+                        Text("Remove")
+                    }
+                },
+                dismissButton = {
+                    TextButton(
+                        onClick = {
+                            showDeleteConfirmation = false
+                        }
+                    ) {
+                        Text("Cancel")
+                    }
+                }
+            )
         }
 
         Button(

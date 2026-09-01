@@ -49,3 +49,7 @@ fun loadImages(context: Context): List<File> {
         ?.sortedByDescending { it.lastModified() }
         ?: emptyList()
 }
+
+fun deleteImage(imageFile: File): Boolean {
+    return imageFile.delete()
+}
