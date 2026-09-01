@@ -11,7 +11,7 @@ android {
 
     defaultConfig {
         applicationId = "com.paddysystems.mywardrobe"
-        minSdk = 23
+        minSdk = 24
         targetSdk = 37
         versionCode = 1
         versionName = "1.0"
@@ -53,4 +53,5 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.tooling)
     implementation(libs.coil.compose)
     implementation(libs.androidx.navigation.compose)
+    implementation(libs.onnxruntime.android)
 }

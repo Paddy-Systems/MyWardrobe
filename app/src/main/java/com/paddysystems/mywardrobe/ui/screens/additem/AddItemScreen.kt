@@ -25,9 +25,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.paddysystems.mywardrobe.createCameraImageUri
 
-import com.paddysystems.mywardrobe.data.model.CropType
-import com.paddysystems.mywardrobe.ui.screens.additem.components.CropStep
-import com.paddysystems.mywardrobe.ui.screens.additem.components.ItemShapeStep
+import android.util.Log
+import androidx.compose.runtime.LaunchedEffect
+import com.paddysystems.mywardrobe.ml.FashionSigLipEncoder
+
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun AddItemScreen(
@@ -45,10 +48,6 @@ fun AddItemScreen(
 
     var currentStep by remember {
         mutableStateOf(AddItemStep.IMAGE)
-    }
-
-    var cropType by remember {
-        mutableStateOf<CropType?>(null)
     }
 
     val galleryPicker = rememberLauncherForActivityResult(
@@ -116,31 +115,38 @@ fun AddItemScreen(
             }
 
             AddItemStep.ANALYSING -> {
+
+                LaunchedEffect(Unit) {
+                    try {
+                        val modelInfo = withContext(Dispatchers.IO) {
+                            val encoder = FashionSigLipEncoder(
+                                context.applicationContext
+                            )
+
+                            encoder.modelInfo()
+                        }
+
+                        Log.d(
+                            "FashionSigLIP",
+                            modelInfo
+                        )
+                    } catch (exception: Exception) {
+                        Log.e(
+                            "FashionSigLIP",
+                            "Failed to load model",
+                            exception
+                        )
+                    }
+                }
+
                 Column {
                     Text("Analysing item...")
-                    Text("Detecting clothing type and colours")
+                    Text("Loading FashionSigLIP...")
                 }
             }
 
-            AddItemStep.CROP -> {
-                val imageUri = selectedImageUri
-                val selectedCropType = cropType
-
-                if (
-                    imageUri != null &&
-                    selectedCropType != null
-                ) {
-                    CropStep(
-                        imageUri = imageUri,
-                        cropType = selectedCropType,
-                        onBack = {
-                            currentStep = AddItemStep.SHAPE
-                        },
-                        onContinue = {
-                            //
-                        }
-                    )
-                }
+            AddItemStep.DETAILS -> {
+                Text("Item details")
             }
         }
 
