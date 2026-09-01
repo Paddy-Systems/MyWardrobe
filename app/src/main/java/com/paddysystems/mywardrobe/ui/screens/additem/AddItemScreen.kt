@@ -69,6 +69,10 @@ fun AddItemScreen(
         }
     }
 
+    var imageEmbedding by remember {
+        mutableStateOf<FloatArray?>(null)
+    }
+
     var predictedClothingTypeId by remember {
         mutableStateOf<String?>(null)
     }
@@ -138,13 +142,18 @@ fun AddItemScreen(
                         ?: return@LaunchedEffect
 
                     try {
-                        val (clothingMatches, colourMatches) =
-                            withContext(Dispatchers.IO) {
+                        val (
+                            embedding,
+                            clothingMatches,
+                            colourMatches
+                        ) = withContext(Dispatchers.IO) {
                                 val encoder = FashionSigLipEncoder(
                                     context.applicationContext
                                 )
 
                                 val embedding = encoder.encode(imageUri)
+
+
 
                                 val clothingMatcher = ClothingEmbeddingMatcher(
                                     context.applicationContext
@@ -154,16 +163,19 @@ fun AddItemScreen(
                                     context.applicationContext
                                 )
 
-                                Pair(
-                                    clothingMatcher.topMatches(
-                                        embedding,
-                                        5
-                                    ),
-                                    colourMatcher.topMatches(
-                                        embedding,
-                                        5
-                                    )
+                            Triple(
+                                embedding,
+
+                                clothingMatcher.topMatches(
+                                    embedding,
+                                    5
+                                ),
+
+                                colourMatcher.topMatches(
+                                    embedding,
+                                    5
                                 )
+                            )
 
                             }
                         Log.d(
@@ -190,6 +202,8 @@ fun AddItemScreen(
                                 }
                             }
                         )
+                        imageEmbedding =
+                            embedding
                         predictedClothingTypeId =
                             clothingMatches.firstOrNull()?.id
 
@@ -260,7 +274,8 @@ fun AddItemScreen(
                         enabled =
                             selectedImageUri != null &&
                                     predictedClothingTypeId != null &&
-                                    predictedColours.isNotEmpty(),
+                                    predictedColours.isNotEmpty() &&
+                                    imageEmbedding != null,
                         onClick = {
                             val imageUri =
                                 selectedImageUri
@@ -270,14 +285,28 @@ fun AddItemScreen(
                                 predictedClothingTypeId
                                     ?: return@Button
 
+                            val embedding =
+                                imageEmbedding
+                                    ?: return@Button
+
                             scope.launch {
                                 val savedItem =
                                     withContext(Dispatchers.IO) {
                                         saveWardrobeItem(
-                                            context = context.applicationContext,
-                                            imageUri = imageUri,
-                                            clothingTypeId = clothingTypeId,
-                                            colours = predictedColours
+                                            context =
+                                                context.applicationContext,
+
+                                            imageUri =
+                                                imageUri,
+
+                                            clothingTypeId =
+                                                clothingTypeId,
+
+                                            colours =
+                                                predictedColours,
+
+                                            imageEmbedding =
+                                                embedding
                                         )
                                     }
 

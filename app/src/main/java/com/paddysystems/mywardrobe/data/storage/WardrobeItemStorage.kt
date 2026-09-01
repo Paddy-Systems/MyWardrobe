@@ -7,12 +7,17 @@ import com.paddysystems.mywardrobe.saveImage
 import org.json.JSONArray
 import org.json.JSONObject
 import java.io.File
+import com.paddysystems.mywardrobe.data.model.SemanticTag
+import com.paddysystems.mywardrobe.data.model.WardrobeMetadata
+import java.io.DataInputStream
+import java.io.DataOutputStream
 
 fun saveWardrobeItem(
     context: Context,
     imageUri: Uri,
     clothingTypeId: String,
-    colours: List<String>
+    colours: List<String>,
+    imageEmbedding: FloatArray
 ): WardrobeItem? {
     val imageFile = saveImage(
         context,
@@ -23,7 +28,8 @@ fun saveWardrobeItem(
         id = imageFile.nameWithoutExtension,
         imagePath = imageFile.absolutePath,
         clothingTypeId = clothingTypeId,
-        colours = colours
+        colours = colours,
+        createdAt = System.currentTimeMillis()
     )
 
     val itemDirectory = File(
@@ -39,6 +45,12 @@ fun saveWardrobeItem(
     )
 
     return try {
+        saveWardrobeItemEmbedding(
+            context = context,
+            itemId = item.id,
+            embedding = imageEmbedding
+        )
+
         val json = JSONObject()
             .put("id", item.id)
             .put("imagePath", item.imagePath)
@@ -46,6 +58,15 @@ fun saveWardrobeItem(
             .put(
                 "colours",
                 JSONArray(item.colours)
+            ).put(
+                "createdAt",
+                item.createdAt
+            )
+            .put(
+                "metadata",
+                metadataToJson(
+                    item.metadata
+                )
             )
 
         itemFile.writeText(
@@ -55,6 +76,14 @@ fun saveWardrobeItem(
         item
     } catch (exception: Exception) {
         imageFile.delete()
+
+        getEmbeddingFile(
+            context,
+            item.id
+        ).delete()
+
+        itemFile.delete()
+
         null
     }
 }
@@ -77,9 +106,6 @@ fun loadWardrobeItems(
             it.isFile &&
                     it.extension == "json"
         }
-        ?.sortedByDescending {
-            it.lastModified()
-        }
         ?.mapNotNull { itemFile ->
             try {
                 val json = JSONObject(
@@ -97,11 +123,29 @@ fun loadWardrobeItems(
 
                 val item = WardrobeItem(
                     id = json.getString("id"),
-                    imagePath = json.getString("imagePath"),
-                    clothingTypeId = json.getString(
-                        "clothingTypeId"
-                    ),
-                    colours = colours
+
+                    imagePath =
+                        json.getString("imagePath"),
+
+                    clothingTypeId =
+                        json.getString(
+                            "clothingTypeId"
+                        ),
+
+                    colours = colours,
+
+                    createdAt =
+                        json.optLong(
+                            "createdAt",
+                            itemFile.lastModified()
+                        ),
+
+                    metadata =
+                        metadataFromJson(
+                            json.optJSONObject(
+                                "metadata"
+                            )
+                        )
                 )
 
                 if (
@@ -114,6 +158,9 @@ fun loadWardrobeItems(
             } catch (exception: Exception) {
                 null
             }
+        }
+        ?.sortedByDescending {
+            it.createdAt
         }
         ?: emptyList()
 }
@@ -172,11 +219,29 @@ fun loadWardrobeItem(
 
         val item = WardrobeItem(
             id = json.getString("id"),
-            imagePath = json.getString("imagePath"),
-            clothingTypeId = json.getString(
-                "clothingTypeId"
-            ),
-            colours = colours
+
+            imagePath =
+                json.getString("imagePath"),
+
+            clothingTypeId =
+                json.getString(
+                    "clothingTypeId"
+                ),
+
+            colours = colours,
+
+            createdAt =
+                json.optLong(
+                    "createdAt",
+                    itemFile.lastModified()
+                ),
+
+            metadata =
+                metadataFromJson(
+                    json.optJSONObject(
+                        "metadata"
+                    )
+                )
         )
 
         if (
@@ -218,6 +283,15 @@ fun updateWardrobeItem(
             .put(
                 "colours",
                 JSONArray(updatedItem.colours)
+            ).put(
+                "createdAt",
+                updatedItem.createdAt
+            )
+            .put(
+                "metadata",
+                metadataToJson(
+                    updatedItem.metadata
+                )
             )
 
         itemFile.writeText(
@@ -227,5 +301,205 @@ fun updateWardrobeItem(
         true
     } catch (exception: Exception) {
         false
+    }
+}
+
+private fun semanticTagsToJson(
+    tags: List<SemanticTag>
+): JSONArray {
+    val array = JSONArray()
+
+    tags.forEach { tag ->
+        array.put(
+            JSONObject()
+                .put("id", tag.id)
+                .put(
+                    "similarity",
+                    tag.similarity.toDouble()
+                )
+        )
+    }
+
+    return array
+}
+
+private fun semanticTagsFromJson(
+    array: JSONArray?
+): List<SemanticTag> {
+    if (array == null) {
+        return emptyList()
+    }
+
+    return List(array.length()) { index ->
+        val json =
+            array.getJSONObject(index)
+
+        SemanticTag(
+            id = json.getString("id"),
+            similarity =
+                json.getDouble(
+                    "similarity"
+                ).toFloat()
+        )
+    }
+}
+
+private fun metadataToJson(
+    metadata: WardrobeMetadata
+): JSONObject {
+    return JSONObject()
+        .put(
+            "patterns",
+            semanticTagsToJson(
+                metadata.patterns
+            )
+        )
+        .put(
+            "materials",
+            semanticTagsToJson(
+                metadata.materials
+            )
+        )
+        .put(
+            "styles",
+            semanticTagsToJson(
+                metadata.styles
+            )
+        )
+        .put(
+            "occasions",
+            semanticTagsToJson(
+                metadata.occasions
+            )
+        )
+        .put(
+            "seasons",
+            semanticTagsToJson(
+                metadata.seasons
+            )
+        )
+        .put(
+            "formalities",
+            semanticTagsToJson(
+                metadata.formalities
+            )
+        )
+}
+
+private fun metadataFromJson(
+    json: JSONObject?
+): WardrobeMetadata {
+    if (json == null) {
+        return WardrobeMetadata()
+    }
+
+    return WardrobeMetadata(
+        patterns =
+            semanticTagsFromJson(
+                json.optJSONArray(
+                    "patterns"
+                )
+            ),
+        materials =
+            semanticTagsFromJson(
+                json.optJSONArray(
+                    "materials"
+                )
+            ),
+        styles =
+            semanticTagsFromJson(
+                json.optJSONArray(
+                    "styles"
+                )
+            ),
+        occasions =
+            semanticTagsFromJson(
+                json.optJSONArray(
+                    "occasions"
+                )
+            ),
+        seasons =
+            semanticTagsFromJson(
+                json.optJSONArray(
+                    "seasons"
+                )
+            ),
+        formalities =
+            semanticTagsFromJson(
+                json.optJSONArray(
+                    "formalities"
+                )
+            )
+    )
+}
+
+private fun getEmbeddingFile(
+    context: Context,
+    itemId: String
+): File {
+    val directory = File(
+        context.filesDir,
+        "wardrobe_embeddings"
+    )
+
+    directory.mkdirs()
+
+    return File(
+        directory,
+        "$itemId.bin"
+    )
+}
+
+private fun saveWardrobeItemEmbedding(
+    context: Context,
+    itemId: String,
+    embedding: FloatArray
+) {
+    val file = getEmbeddingFile(
+        context = context,
+        itemId = itemId
+    )
+
+    DataOutputStream(
+        file.outputStream()
+            .buffered()
+    ).use { output ->
+        embedding.forEach { value ->
+            output.writeFloat(value)
+        }
+    }
+}
+
+fun loadWardrobeItemEmbedding(
+    context: Context,
+    itemId: String
+): FloatArray? {
+    val file = getEmbeddingFile(
+        context = context,
+        itemId = itemId
+    )
+
+    if (
+        !file.exists() ||
+        file.length() == 0L ||
+        file.length() % 4L != 0L
+    ) {
+        return null
+    }
+
+    val valueCount =
+        (file.length() / 4L).toInt()
+
+    return try {
+        DataInputStream(
+            file.inputStream()
+                .buffered()
+        ).use { input ->
+            FloatArray(valueCount) {
+                input.readFloat()
+            }
+        }
+    } catch (exception: Exception) {
+        null
     }
 }
