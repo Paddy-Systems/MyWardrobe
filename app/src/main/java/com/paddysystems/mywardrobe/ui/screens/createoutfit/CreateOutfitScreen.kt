@@ -39,15 +39,14 @@ import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.OutfitLaye
 import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.StackedOutfitPreview
 import java.util.UUID
 import kotlin.math.absoluteValue
+import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.OutfitStandaloneSlot
+import com.paddysystems.mywardrobe.ui.screens.createoutfit.components.OutfitAccessoriesRow
 
 @Composable
 fun CreateOutfitScreen() {
 
     val context =
         LocalContext.current
-
-    val scope =
-        rememberCoroutineScope()
 
     val wardrobeItems =
         remember {
@@ -79,6 +78,50 @@ fun CreateOutfitScreen() {
                         OutfitPlacement.FULL_LENGTH
             }
         }
+
+    val shoeItems =
+        remember(wardrobeItems) {
+            wardrobeItems.filter {
+                it.outfitPlacement() ==
+                        OutfitPlacement.SHOES
+            }
+        }
+
+    val bagItems =
+        remember(wardrobeItems) {
+            wardrobeItems.filter {
+                it.outfitPlacement() ==
+                        OutfitPlacement.BAG
+            }
+        }
+
+    val accessoryItems =
+        remember(wardrobeItems) {
+            wardrobeItems.filter {
+                it.outfitPlacement() ==
+                        OutfitPlacement.ACCESSORY
+            }
+        }
+
+    var shoes by remember {
+        mutableStateOf(
+            OutfitSlotSelection()
+        )
+    }
+
+    var bag by remember {
+        mutableStateOf(
+            OutfitSlotSelection()
+        )
+    }
+
+    var accessories by remember {
+        mutableStateOf<
+                List<OutfitSlotSelection>
+                >(
+            emptyList()
+        )
+    }
 
     var layers by remember {
         mutableStateOf(
@@ -359,7 +402,7 @@ fun CreateOutfitScreen() {
                             placement ->
 
                         pickerTarget =
-                            OutfitPickerTarget(
+                            OutfitPickerTarget.Layer(
                                 layerId =
                                     layer.id,
 
@@ -494,47 +537,365 @@ fun CreateOutfitScreen() {
             modifier =
                 Modifier.height(24.dp)
         )
+
+        Column(
+            modifier =
+                Modifier.padding(
+                    horizontal = 16.dp
+                )
+        ) {
+            val selectedShoes =
+                shoeItems.firstOrNull {
+                    it.id == shoes.itemId
+                }
+
+            OutfitStandaloneSlot(
+                label = "Shoes",
+
+                item =
+                    selectedShoes,
+
+                isLocked =
+                    shoes.isLocked,
+
+                hasItems =
+                    shoeItems.isNotEmpty(),
+
+                onPrevious = {
+                    shoes =
+                        shoes.copy(
+                            itemId =
+                                cycleOutfitItem(
+                                    currentItemId =
+                                        shoes.itemId,
+
+                                    items =
+                                        shoeItems,
+
+                                    direction = -1
+                                )
+                        )
+                },
+
+                onNext = {
+                    shoes =
+                        shoes.copy(
+                            itemId =
+                                cycleOutfitItem(
+                                    currentItemId =
+                                        shoes.itemId,
+
+                                    items =
+                                        shoeItems,
+
+                                    direction = 1
+                                )
+                        )
+                },
+
+                onToggleLock = {
+                    shoes =
+                        shoes.copy(
+                            isLocked =
+                                !shoes.isLocked
+                        )
+                },
+
+                onSearch = {
+                    pickerTarget =
+                        OutfitPickerTarget.Shoes
+                }
+            )
+
+            Spacer(
+                modifier =
+                    Modifier.height(20.dp)
+            )
+
+            val selectedBag =
+                bagItems.firstOrNull {
+                    it.id == bag.itemId
+                }
+
+            OutfitStandaloneSlot(
+                label = "Bag",
+
+                item =
+                    selectedBag,
+
+                isLocked =
+                    bag.isLocked,
+
+                hasItems =
+                    bagItems.isNotEmpty(),
+
+                onPrevious = {
+                    bag =
+                        bag.copy(
+                            itemId =
+                                cycleOutfitItem(
+                                    currentItemId =
+                                        bag.itemId,
+
+                                    items =
+                                        bagItems,
+
+                                    direction = -1
+                                )
+                        )
+                },
+
+                onNext = {
+                    bag =
+                        bag.copy(
+                            itemId =
+                                cycleOutfitItem(
+                                    currentItemId =
+                                        bag.itemId,
+
+                                    items =
+                                        bagItems,
+
+                                    direction = 1
+                                )
+                        )
+                },
+
+                onToggleLock = {
+                    bag =
+                        bag.copy(
+                            isLocked =
+                                !bag.isLocked
+                        )
+                },
+
+                onSearch = {
+                    pickerTarget =
+                        OutfitPickerTarget.Bag
+                }
+            )
+        }
+
+        Spacer(
+            modifier =
+                Modifier.height(20.dp)
+        )
+
+        OutfitAccessoriesRow(
+            slots =
+                accessories,
+
+            accessoryItems =
+                accessoryItems,
+
+            onSlotChange = {
+                    index,
+                    updatedSlot ->
+
+                accessories =
+                    accessories
+                        .toMutableList()
+                        .also {
+                            it[index] =
+                                updatedSlot
+                        }
+            },
+
+            onSearch = {
+                    index ->
+
+                pickerTarget =
+                    OutfitPickerTarget
+                        .Accessory(
+                            index
+                        )
+            },
+
+            onAdd = {
+                accessories =
+                    accessories +
+                            OutfitSlotSelection()
+            },
+
+            onRemove = {
+                    index ->
+
+                accessories =
+                    accessories
+                        .toMutableList()
+                        .also {
+                            it.removeAt(
+                                index
+                            )
+                        }
+            }
+        )
+
+        Spacer(
+            modifier =
+                Modifier.height(24.dp)
+        )
+
+        val canShuffleWholeOutfit =
+            layers.any { layer ->
+
+                when (layer.mode) {
+
+                    OutfitLayerMode.SEPARATES ->
+                        (
+                                !layer.top.isLocked &&
+                                        topItems.isNotEmpty()
+                                ) ||
+                                (
+                                        !layer.bottom.isLocked &&
+                                                bottomItems.isNotEmpty()
+                                        )
+
+                    OutfitLayerMode.FULL_LENGTH ->
+                        !layer
+                            .fullLength
+                            .isLocked &&
+                                fullLengthItems
+                                    .isNotEmpty()
+                }
+            } ||
+                    (
+                            !shoes.isLocked &&
+                                    shoeItems.isNotEmpty()
+                            ) ||
+                    (
+                            !bag.isLocked &&
+                                    bagItems.isNotEmpty()
+                            ) ||
+                    accessories.any {
+                        !it.isLocked &&
+                                accessoryItems.isNotEmpty()
+                    }
+
+        Button(
+            modifier =
+                Modifier.fillMaxWidth(),
+
+            enabled =
+                canShuffleWholeOutfit,
+
+            onClick = {
+
+                layers =
+                    layers.map { layer ->
+
+                        shuffleOutfitLayer(
+                            layer = layer,
+
+                            topItems =
+                                topItems,
+
+                            bottomItems =
+                                bottomItems,
+
+                            fullLengthItems =
+                                fullLengthItems
+                        )
+                    }
+
+                shoes =
+                    shuffleOutfitSlot(
+                        slot = shoes,
+                        items = shoeItems
+                    )
+
+                bag =
+                    shuffleOutfitSlot(
+                        slot = bag,
+                        items = bagItems
+                    )
+
+                accessories =
+                    accessories.map {
+                        shuffleOutfitSlot(
+                            slot = it,
+                            items =
+                                accessoryItems
+                        )
+                    }
+            }
+        ) {
+            Text("Shuffle whole outfit")
+        }
+
+        Spacer(
+            modifier =
+                Modifier.height(24.dp)
+        )
     }
 
     pickerTarget
         ?.let { target ->
 
             val eligibleItems =
-                when (
-                    target.placement
-                ) {
-                    OutfitPlacement.TOP ->
-                        topItems
+                when (target) {
 
-                    OutfitPlacement.BOTTOM ->
-                        bottomItems
+                    is OutfitPickerTarget.Layer ->
+                        when (
+                            target.placement
+                        ) {
+                            OutfitPlacement.TOP ->
+                                topItems
 
-                    OutfitPlacement
-                        .FULL_LENGTH ->
-                        fullLengthItems
+                            OutfitPlacement.BOTTOM ->
+                                bottomItems
 
-                    else ->
-                        emptyList()
+                            OutfitPlacement
+                                .FULL_LENGTH ->
+                                fullLengthItems
+
+                            else ->
+                                emptyList()
+                        }
+
+                    OutfitPickerTarget.Shoes ->
+                        shoeItems
+
+                    OutfitPickerTarget.Bag ->
+                        bagItems
+
+                    is OutfitPickerTarget.Accessory ->
+                        accessoryItems
+                }
+
+            val title =
+                when (target) {
+
+                    is OutfitPickerTarget.Layer ->
+                        when (
+                            target.placement
+                        ) {
+                            OutfitPlacement.TOP ->
+                                "Choose top"
+
+                            OutfitPlacement.BOTTOM ->
+                                "Choose bottom"
+
+                            OutfitPlacement
+                                .FULL_LENGTH ->
+                                "Choose full-length item"
+
+                            else ->
+                                "Choose item"
+                        }
+
+                    OutfitPickerTarget.Shoes ->
+                        "Choose shoes"
+
+                    OutfitPickerTarget.Bag ->
+                        "Choose bag"
+
+                    is OutfitPickerTarget.Accessory ->
+                        "Choose accessory"
                 }
 
             OutfitItemPickerDialog(
-                title =
-                    when (
-                        target.placement
-                    ) {
-                        OutfitPlacement.TOP ->
-                            "Choose top"
-
-                        OutfitPlacement.BOTTOM ->
-                            "Choose bottom"
-
-                        OutfitPlacement
-                            .FULL_LENGTH ->
-                            "Choose full-length item"
-
-                        else ->
-                            "Choose item"
-                    },
+                title = title,
 
                 items =
                     eligibleItems,
@@ -542,52 +903,119 @@ fun CreateOutfitScreen() {
                 onSelect = {
                         selectedItem ->
 
-                    val layerIndex =
-                        layers.indexOfFirst {
-                            it.id ==
-                                    target.layerId
+                    when (target) {
+
+                        is OutfitPickerTarget.Layer -> {
+
+                            val layerIndex =
+                                layers.indexOfFirst {
+                                    it.id ==
+                                            target.layerId
+                                }
+
+                            if (
+                                layerIndex != -1
+                            ) {
+                                val updated =
+                                    updateLayerSelection(
+                                        layer =
+                                            layers[
+                                                layerIndex
+                                            ],
+
+                                        placement =
+                                            target
+                                                .placement,
+
+                                        item =
+                                            selectedItem
+                                    )
+
+                                layers =
+                                    layers
+                                        .toMutableList()
+                                        .also {
+                                            it[layerIndex] =
+                                                updated
+                                        }
+                            }
                         }
 
-                    if (layerIndex != -1) {
+                        OutfitPickerTarget.Shoes -> {
 
-                        val updatedLayer =
-                            updateLayerSelection(
-                                layer =
-                                    layers[
-                                        layerIndex
-                                    ],
+                            shoes =
+                                shoes.copy(
+                                    itemId =
+                                        selectedItem
+                                            ?.id
+                                )
+                        }
 
-                                placement =
-                                    target
-                                        .placement,
+                        OutfitPickerTarget.Bag -> {
 
-                                item =
-                                    selectedItem
-                            )
+                            bag =
+                                bag.copy(
+                                    itemId =
+                                        selectedItem
+                                            ?.id
+                                )
+                        }
 
-                        layers =
-                            layers
-                                .toMutableList()
-                                .also {
-                                    it[layerIndex] =
-                                        updatedLayer
-                                }
+                        is OutfitPickerTarget.Accessory -> {
+
+                            if (
+                                target.index
+                                in accessories.indices
+                            ) {
+                                accessories =
+                                    accessories
+                                        .toMutableList()
+                                        .also {
+                                            it[
+                                                target.index
+                                            ] =
+                                                it[
+                                                    target.index
+                                                ].copy(
+                                                    itemId =
+                                                        selectedItem
+                                                            ?.id
+                                                )
+                                        }
+                            }
+                        }
                     }
 
-                    pickerTarget = null
+                    pickerTarget =
+                        null
                 },
 
                 onDismiss = {
-                    pickerTarget = null
+                    pickerTarget =
+                        null
                 }
             )
         }
 }
 
-private data class OutfitPickerTarget(
-    val layerId: String,
-    val placement: OutfitPlacement
-)
+private sealed interface OutfitPickerTarget {
+
+    data class Layer(
+        val layerId: String,
+        val placement:
+        OutfitPlacement
+    ) : OutfitPickerTarget
+
+    data object Shoes :
+        OutfitPickerTarget
+
+    data object Bag :
+        OutfitPickerTarget
+
+    data class Accessory(
+        val index: Int
+    ) : OutfitPickerTarget
+}
 
 private fun createOutfitLayer(
     topItems: List<WardrobeItem>,

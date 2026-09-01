@@ -3,6 +3,7 @@ package com.paddysystems.mywardrobe.ui.screens.createoutfit
 import com.paddysystems.mywardrobe.data.model.OutfitLayer
 import com.paddysystems.mywardrobe.data.model.OutfitLayerMode
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
+import com.paddysystems.mywardrobe.data.model.OutfitSlotSelection
 
 fun cycleOutfitItem(
     currentItemId: String?,
@@ -62,11 +63,36 @@ private fun Int.floorMod(
             ) % divisor
 }
 
+fun shuffleOutfitSlot(
+    slot: OutfitSlotSelection,
+    items: List<WardrobeItem>
+): OutfitSlotSelection {
+
+    if (
+        slot.isLocked ||
+        items.isEmpty()
+    ) {
+        return slot
+    }
+
+    return slot.copy(
+        itemId =
+            randomDifferentItemId(
+                currentItemId =
+                    slot.itemId,
+
+                items =
+                    items
+            )
+    )
+}
+
 fun shuffleOutfitLayer(
     layer: OutfitLayer,
     topItems: List<WardrobeItem>,
     bottomItems: List<WardrobeItem>,
-    fullLengthItems: List<WardrobeItem>
+    fullLengthItems:
+    List<WardrobeItem>
 ): OutfitLayer {
 
     return when (layer.mode) {
@@ -74,62 +100,34 @@ fun shuffleOutfitLayer(
         OutfitLayerMode.SEPARATES ->
             layer.copy(
                 top =
-                    if (
-                        layer.top.isLocked
-                    ) {
-                        layer.top
-                    } else {
-                        layer.top.copy(
-                            itemId =
-                                randomDifferentItemId(
-                                    currentItemId =
-                                        layer.top.itemId,
-                                    items =
-                                        topItems
-                                )
-                        )
-                    },
+                    shuffleOutfitSlot(
+                        slot =
+                            layer.top,
+
+                        items =
+                            topItems
+                    ),
 
                 bottom =
-                    if (
-                        layer.bottom.isLocked
-                    ) {
-                        layer.bottom
-                    } else {
-                        layer.bottom.copy(
-                            itemId =
-                                randomDifferentItemId(
-                                    currentItemId =
-                                        layer.bottom.itemId,
-                                    items =
-                                        bottomItems
-                                )
-                        )
-                    }
+                    shuffleOutfitSlot(
+                        slot =
+                            layer.bottom,
+
+                        items =
+                            bottomItems
+                    )
             )
 
         OutfitLayerMode.FULL_LENGTH ->
             layer.copy(
                 fullLength =
-                    if (
-                        layer
-                            .fullLength
-                            .isLocked
-                    ) {
-                        layer.fullLength
-                    } else {
-                        layer.fullLength.copy(
-                            itemId =
-                                randomDifferentItemId(
-                                    currentItemId =
-                                        layer
-                                            .fullLength
-                                            .itemId,
-                                    items =
-                                        fullLengthItems
-                                )
-                        )
-                    }
+                    shuffleOutfitSlot(
+                        slot =
+                            layer.fullLength,
+
+                        items =
+                            fullLengthItems
+                    )
             )
     }
 }
