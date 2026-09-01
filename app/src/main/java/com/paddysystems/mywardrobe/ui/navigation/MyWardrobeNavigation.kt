@@ -5,7 +5,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
-import com.paddysystems.mywardrobe.WardrobeScreen
+import com.paddysystems.mywardrobe.ui.screens.wardrobe.WardrobeScreen
 import com.paddysystems.mywardrobe.ui.screens.additem.AddItemScreen
 import com.paddysystems.mywardrobe.ui.screens.edititem.EditItemScreen
 import com.paddysystems.mywardrobe.ui.screens.itemdetails.ItemDetailsScreen

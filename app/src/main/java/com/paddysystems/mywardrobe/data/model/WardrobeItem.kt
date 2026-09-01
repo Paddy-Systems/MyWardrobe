@@ -19,9 +19,3 @@ data class WardrobeItem(
     val outfitIds: List<String> =
         emptyList()
 )
-
-fun WardrobeItem.isValid(): Boolean {
-    return imagePath.isNotBlank() &&
-            clothingTypeId.isNotBlank() &&
-            colours.size in 1..3
-}

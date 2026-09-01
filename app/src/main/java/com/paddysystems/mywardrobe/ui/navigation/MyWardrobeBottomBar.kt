@@ -15,8 +15,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
-enum class MyWardrobeDestination { WARDROBE, ADD, OUTFITS }
-
 @Composable
 fun MyWardrobeBottomBar(
     selectedDestination: MyWardrobeDestination,

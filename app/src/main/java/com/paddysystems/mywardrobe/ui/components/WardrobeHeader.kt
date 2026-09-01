@@ -12,9 +12,9 @@ fun WardrobeHeader(
     modifier: Modifier = Modifier
 ) {
     val subtitle = if (itemCount == totalItemCount) {
-        "$totalItemCount ${itemWord(totalItemCount)}, ready to style"
+        "$totalItemCount ${if (totalItemCount == 1) "item" else "items"}, ready to style"
     } else {
-        "$itemCount of $totalItemCount ${itemWord(totalItemCount)} shown"
+        "$itemCount of $totalItemCount ${if (totalItemCount == 1) "item" else "items"} shown"
     }
     EditorialPageHeader(
         eyebrow = if (selectedCount > 0) "Editing wardrobe" else "Your collection",
@@ -22,14 +22,4 @@ fun WardrobeHeader(
         subtitle = if (selectedCount > 0) "Choose what to do with these pieces" else subtitle,
         modifier = modifier
     )
-}
-
-private fun itemWord(
-    count: Int
-): String {
-    return if (count == 1) {
-        "item"
-    } else {
-        "items"
-    }
 }
