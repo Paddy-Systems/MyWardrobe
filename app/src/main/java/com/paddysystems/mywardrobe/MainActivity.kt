@@ -25,8 +25,14 @@ import androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia
 import android.net.Uri
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+
+import coil3.compose.AsyncImage
+import androidx.compose.foundation.layout.size
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.unit.dp
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -46,14 +52,16 @@ class MainActivity : ComponentActivity() {
 
 @Composable
 fun WardrobeScreen(modifier: Modifier = Modifier) {
-    var selectedImageUri by remember {
-        mutableStateOf<Uri?>(null)
+    val images = remember {
+        mutableStateListOf<Uri>()
     }
 
     val imagePicker = rememberLauncherForActivityResult(
         contract = PickVisualMedia()
     ) { uri ->
-        selectedImageUri = uri
+        if (uri != null) {
+            images.add(uri)
+        }
     }
 
     Column(
@@ -62,10 +70,17 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("My Wardrobe")
-        Text("No items yet")
+        if (images.isEmpty()) {
+            Text("No items yet")
+        }
 
-        if (selectedImageUri != null) {
-            Text("Image selected")
+        images.forEach { imageUri ->
+            AsyncImage(
+                model = imageUri,
+                contentDescription = "Wardrobe item",
+                modifier = Modifier.size(100.dp),
+                contentScale = ContentScale.Crop
+            )
         }
 
         Button(
