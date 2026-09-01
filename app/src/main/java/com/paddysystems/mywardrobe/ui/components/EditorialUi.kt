@@ -1,5 +1,6 @@
 package com.paddysystems.mywardrobe.ui.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -95,6 +96,32 @@ fun EditorialSecondaryButton(
         onClick = onClick,
         enabled = enabled,
         modifier = modifier,
+        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 15.dp)
+    ) {
+        if (icon != null) Icon(icon, null, modifier = Modifier.padding(end = 8.dp))
+        Text(text.uppercase(), style = MaterialTheme.typography.labelLarge)
+    }
+}
+
+@Composable
+fun EditorialDangerButton(
+    text: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    icon: ImageVector? = null
+) {
+    OutlinedButton(
+        onClick = onClick,
+        enabled = enabled,
+        modifier = modifier,
+        colors = ButtonDefaults.outlinedButtonColors(
+            contentColor = MaterialTheme.colorScheme.error
+        ),
+        border = BorderStroke(
+            width = 1.dp,
+            color = MaterialTheme.colorScheme.error.copy(alpha = 0.45f)
+        ),
         contentPadding = PaddingValues(horizontal = 22.dp, vertical = 15.dp)
     ) {
         if (icon != null) Icon(icon, null, modifier = Modifier.padding(end = 8.dp))
