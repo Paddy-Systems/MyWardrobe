@@ -17,7 +17,8 @@ import androidx.compose.ui.unit.sp
 
 @Composable
 fun MyWardrobeBottomBar(
-    isViewingOutfits: Boolean,
+    showWardrobeOnLeft: Boolean,
+    showWardrobeOnRight: Boolean,
     onCreateOutfit: () -> Unit,
     onAddItem: () -> Unit,
     onViewOutfits: () -> Unit,
@@ -39,10 +40,21 @@ fun MyWardrobeBottomBar(
                 .weight(1f)
                 .height(48.dp),
 
-            onClick =
-                onCreateOutfit
+            onClick = {
+                if (showWardrobeOnLeft) {
+                    onWardrobe()
+                } else {
+                    onCreateOutfit()
+                }
+            }
         ) {
-            Text("Create Outfit")
+            Text(
+                if (showWardrobeOnLeft) {
+                    "Wardrobe"
+                } else {
+                    "Create Outfit"
+                }
+            )
         }
 
         FilledIconButton(
@@ -70,7 +82,7 @@ fun MyWardrobeBottomBar(
                 .height(48.dp),
 
             onClick = {
-                if (isViewingOutfits) {
+                if (showWardrobeOnRight) {
                     onWardrobe()
                 } else {
                     onViewOutfits()
@@ -78,7 +90,7 @@ fun MyWardrobeBottomBar(
             }
         ) {
             Text(
-                if (isViewingOutfits) {
+                if (showWardrobeOnRight) {
                     "Wardrobe"
                 } else {
                     "View Outfits"

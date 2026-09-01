@@ -65,8 +65,14 @@ fun MyWardrobeNavigation(
             ?.destination
             ?.route
 
-    val isViewingOutfits =
+    val showWardrobeOnRight =
         currentRoute ==
+                Routes.OUTFITS
+
+    val showWardrobeOnLeft =
+        currentRoute !=
+                Routes.WARDROBE &&
+                currentRoute !=
                 Routes.OUTFITS
 
     Scaffold(
@@ -74,8 +80,11 @@ fun MyWardrobeNavigation(
 
         bottomBar = {
             MyWardrobeBottomBar(
-                isViewingOutfits =
-                    isViewingOutfits,
+                showWardrobeOnLeft =
+                    showWardrobeOnLeft,
+
+                showWardrobeOnRight =
+                    showWardrobeOnRight,
 
                 onCreateOutfit = {
                     navController.navigate(
