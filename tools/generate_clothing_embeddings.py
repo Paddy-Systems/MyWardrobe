@@ -47,6 +47,29 @@ clothing_types = {
     "boots": "a pair of boots",
     "sandals": "a pair of sandals",
     "heels": "a pair of high heels",
+
+    # Underwear
+    "bra": "a bra",
+    "briefs": "a pair of underwear briefs",
+    "boxer_shorts": "a pair of boxer shorts underwear",
+    "lingerie_set": "a matching lingerie set",
+    "tights": "a pair of tights",
+
+    # Bags
+    "handbag": "a handbag",
+    "backpack": "a backpack",
+    "clutch": "a clutch bag",
+
+    # Accessories
+    "belt": "a clothing belt",
+    "hat": "a hat",
+    "cap": "a baseball cap",
+    "scarf": "a scarf",
+    "gloves": "a pair of gloves",
+    "watch": "a wrist watch",
+    "sunglasses": "a pair of sunglasses",
+    "jewellery": "an item of jewellery",
+    "socks": "a pair of socks",
 }
 
 colours = {

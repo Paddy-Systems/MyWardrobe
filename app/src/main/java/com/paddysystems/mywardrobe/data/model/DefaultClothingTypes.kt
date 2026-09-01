@@ -1,5 +1,6 @@
 package com.paddysystems.mywardrobe.data.model
 
+
 val defaultClothingTypes = listOf(
     // Tops
     ClothingType("tshirt", "T-shirt", true),
@@ -42,6 +43,97 @@ val defaultClothingTypes = listOf(
     ClothingType("boots", "Boots", true),
     ClothingType("sandals", "Sandals", true),
     ClothingType("heels", "Heels", true),
+
+    // Underwear
+    ClothingType(
+        "bra",
+        "Bra",
+        true
+    ),
+    ClothingType(
+        "briefs",
+        "Briefs",
+        true
+    ),
+    ClothingType(
+        "boxer_shorts",
+        "Boxer shorts",
+        true
+    ),
+    ClothingType(
+        "lingerie_set",
+        "Lingerie set",
+        true
+    ),
+    ClothingType(
+        "tights",
+        "Tights",
+        true
+    ),
+
+// Bags
+    ClothingType(
+        "handbag",
+        "Handbag",
+        true
+    ),
+    ClothingType(
+        "backpack",
+        "Backpack",
+        true
+    ),
+    ClothingType(
+        "clutch",
+        "Clutch bag",
+        true
+    ),
+
+// Accessories
+    ClothingType(
+        "belt",
+        "Belt",
+        true
+    ),
+    ClothingType(
+        "hat",
+        "Hat",
+        true
+    ),
+    ClothingType(
+        "cap",
+        "Cap",
+        true
+    ),
+    ClothingType(
+        "scarf",
+        "Scarf",
+        true
+    ),
+    ClothingType(
+        "gloves",
+        "Gloves",
+        true
+    ),
+    ClothingType(
+        "watch",
+        "Watch",
+        true
+    ),
+    ClothingType(
+        "sunglasses",
+        "Sunglasses",
+        true
+    ),
+    ClothingType(
+        "jewellery",
+        "Jewellery",
+        true
+    ),
+    ClothingType(
+        "socks",
+        "Socks",
+        true
+    ),
 
     // Manual fallback — the model doesn't predict this
     ClothingType("other", "Other", true)

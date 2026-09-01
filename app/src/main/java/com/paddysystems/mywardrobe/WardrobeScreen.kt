@@ -26,7 +26,6 @@ import com.paddysystems.mywardrobe.ui.components.WardrobeGrid
 import com.paddysystems.mywardrobe.ui.components.WardrobeToolbar
 import com.paddysystems.mywardrobe.ui.components.SelectionActions
 import com.paddysystems.mywardrobe.ui.components.DeleteConfirmationDialog
-import com.paddysystems.mywardrobe.ui.components.AddItemButton
 import com.paddysystems.mywardrobe.ui.components.WardrobeHeader
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
@@ -37,7 +36,6 @@ import com.paddysystems.mywardrobe.ui.components.WardrobeActiveControls
 @Composable
 fun WardrobeScreen(
     modifier: Modifier = Modifier,
-    onAddItemClick: () -> Unit = {},
     onItemClick: (WardrobeItem) -> Unit = {}
 ) {
     val context = LocalContext.current
@@ -339,9 +337,7 @@ fun WardrobeScreen(
             )
         }
 
-        AddItemButton(
-            onClick = onAddItemClick
-        )
+
     }
 }
 

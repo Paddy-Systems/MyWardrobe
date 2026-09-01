@@ -70,6 +70,10 @@ fun saveWardrobeItem(
                 metadataToJson(
                     item.metadata
                 )
+            ).put(
+                "cutoutPath",
+                item.cutoutPath
+                    ?: JSONObject.NULL
             )
 
         itemFile.writeText(
@@ -148,7 +152,20 @@ fun loadWardrobeItems(
                             json.optJSONObject(
                                 "metadata"
                             )
-                        )
+                        ),
+
+                    cutoutPath =
+                        if (
+                            json.isNull("cutoutPath")
+                        ) {
+                            null
+                        } else {
+                            json.optString(
+                                "cutoutPath"
+                            ).takeIf {
+                                it.isNotBlank()
+                            }
+                        },
                 )
 
                 if (
@@ -200,9 +217,20 @@ fun deleteWardrobeItem(
         !embeddingFile.exists() ||
                 embeddingFile.delete()
 
+    val cutoutDeleted =
+        item.cutoutPath
+            ?.let { path ->
+                val file = File(path)
+
+                !file.exists() ||
+                        file.delete()
+            }
+            ?: true
+
     return imageDeleted &&
             metadataDeleted &&
-            embeddingDeleted
+            embeddingDeleted &&
+            cutoutDeleted
 }
 
 fun loadWardrobeItem(
@@ -256,7 +284,19 @@ fun loadWardrobeItem(
                     json.optJSONObject(
                         "metadata"
                     )
-                )
+                ),
+            cutoutPath =
+                if (
+                    json.isNull("cutoutPath")
+                ) {
+                    null
+                } else {
+                    json.optString(
+                        "cutoutPath"
+                    ).takeIf {
+                        it.isNotBlank()
+                    }
+                },
         )
 
         if (
@@ -307,6 +347,10 @@ fun updateWardrobeItem(
                 metadataToJson(
                     updatedItem.metadata
                 )
+            ).put(
+                "cutoutPath",
+                updatedItem.cutoutPath
+                    ?: JSONObject.NULL
             )
 
         itemFile.writeText(
