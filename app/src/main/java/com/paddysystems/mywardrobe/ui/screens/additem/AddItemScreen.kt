@@ -116,24 +116,36 @@ fun AddItemScreen(
 
             AddItemStep.ANALYSING -> {
 
-                LaunchedEffect(Unit) {
+                LaunchedEffect(selectedImageUri) {
+                    val imageUri = selectedImageUri
+                        ?: return@LaunchedEffect
+
                     try {
-                        val modelInfo = withContext(Dispatchers.IO) {
+                        val embedding = withContext(Dispatchers.IO) {
                             val encoder = FashionSigLipEncoder(
                                 context.applicationContext
                             )
 
-                            encoder.modelInfo()
+                            encoder.encode(imageUri)
                         }
 
                         Log.d(
                             "FashionSigLIP",
-                            modelInfo
+                            "Embedding size: ${embedding.size}"
+                        )
+
+                        Log.d(
+                            "FashionSigLIP",
+                            "First values: ${
+                                embedding
+                                    .take(5)
+                                    .joinToString()
+                            }"
                         )
                     } catch (exception: Exception) {
                         Log.e(
                             "FashionSigLIP",
-                            "Failed to load model",
+                            "Inference failed",
                             exception
                         )
                     }
