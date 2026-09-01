@@ -33,10 +33,23 @@ import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.paddysystems.mywardrobe.ui.theme.MyWardrobeTheme
 import java.io.File
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.setValue
+import androidx.compose.foundation.layout.height
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.foundation.layout.height
 
 @Composable
 fun WardrobeScreen(modifier: Modifier = Modifier) {
     val context = LocalContext.current
+
+    var searchQuery by remember {
+        mutableStateOf("")
+    }
+
     val images = remember {
         mutableStateListOf<File>().apply {
             addAll(loadImages(context))
@@ -64,47 +77,60 @@ fun WardrobeScreen(modifier: Modifier = Modifier) {
             text = "My Wardrobe · ${images.size} items",
             style = MaterialTheme.typography.headlineLarge
         )
-
+        Spacer(
+            modifier = Modifier.height(12.dp)
+        )
         Row(
-            verticalAlignment = Alignment.CenterVertically
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            Button(
-//                modifier = Modifier.fillMaxWidth(),
-                onClick = {
-                    //
-                }
-            ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
+            OutlinedTextField(
+                value = searchQuery,
+                onValueChange = { searchQuery = it },
+                placeholder = {
                     Text("Search")
-                }
-            }
+                },
+                modifier = Modifier
+                    .weight(1f)
+                    .height(56.dp),
+                singleLine = true,
+                shape = RoundedCornerShape(14.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedBorderColor = MaterialTheme.colorScheme.primary,
+                    unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                )
+            )
             Button(
-//                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.height(56.dp),
                 onClick = {
                     //
-                }
+                },
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Filter")
-                }
+                Text("Filter")
             }
             Button(
-//                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.height(56.dp),
                 onClick = {
                     //
-                }
+                },
+                shape = RoundedCornerShape(14.dp),
+                colors = ButtonDefaults.buttonColors(
+                    containerColor = MaterialTheme.colorScheme.secondaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+                )
             ) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text("Sort")
-                }
+                Text("Sort")
             }
         }
+
+        Spacer(
+            modifier = Modifier.height(8.dp)
+        )
 
         if (images.isEmpty()) {
             Column(
