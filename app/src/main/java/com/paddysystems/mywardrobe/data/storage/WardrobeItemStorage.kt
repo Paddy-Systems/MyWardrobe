@@ -142,3 +142,51 @@ fun deleteWardrobeItem(
     return imageDeleted &&
             metadataDeleted
 }
+
+fun loadWardrobeItem(
+    context: Context,
+    itemId: String
+): WardrobeItem? {
+    val itemFile = File(
+        context.filesDir,
+        "wardrobe_items/$itemId.json"
+    )
+
+    if (!itemFile.exists()) {
+        return null
+    }
+
+    return try {
+        val json = JSONObject(
+            itemFile.readText()
+        )
+
+        val colourArray =
+            json.getJSONArray("colours")
+
+        val colours = List(
+            colourArray.length()
+        ) { index ->
+            colourArray.getString(index)
+        }
+
+        val item = WardrobeItem(
+            id = json.getString("id"),
+            imagePath = json.getString("imagePath"),
+            clothingTypeId = json.getString(
+                "clothingTypeId"
+            ),
+            colours = colours
+        )
+
+        if (
+            File(item.imagePath).exists()
+        ) {
+            item
+        } else {
+            null
+        }
+    } catch (exception: Exception) {
+        null
+    }
+}
