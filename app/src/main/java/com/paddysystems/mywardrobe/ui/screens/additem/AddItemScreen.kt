@@ -35,6 +35,7 @@ import com.paddysystems.mywardrobe.ml.ClothingEmbeddingMatcher
 import com.paddysystems.mywardrobe.ml.ColourEmbeddingMatcher
 import com.paddysystems.mywardrobe.ui.screens.additem.components.ItemImagePreview
 import com.paddysystems.mywardrobe.ui.screens.additem.components.ClothingTypeSelector
+import com.paddysystems.mywardrobe.ui.screens.additem.components.ColourSelector
 
 @Composable
 fun AddItemScreen(
@@ -224,7 +225,7 @@ fun AddItemScreen(
                     Text("Item details")
 
                     Spacer(
-                        modifier = Modifier.height(16.dp)
+                        modifier = Modifier.height(8.dp)
                     )
 
                     ClothingTypeSelector(
@@ -234,8 +235,15 @@ fun AddItemScreen(
                         }
                     )
 
-                    Text(
-                        "Colours: ${predictedColours.joinToString()}"
+                    Spacer(
+                        modifier = Modifier.height(8.dp)
+                    )
+
+                    ColourSelector(
+                        selectedColours = predictedColours,
+                        onColoursChanged = { colours ->
+                            predictedColours = colours
+                        }
                     )
                 }
             }
