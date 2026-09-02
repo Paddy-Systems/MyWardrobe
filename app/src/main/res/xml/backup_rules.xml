@@ -7,4 +7,7 @@
     <exclude domain="file" path="profiles/" />
     <exclude domain="file" path="profiles.json" />
     <exclude domain="file" path="models/" />
+    <exclude
+        domain="sharedpref"
+        path="wearfolio_auth.xml" />
 </full-backup-content>
