@@ -3,7 +3,7 @@
     <cloud-backup>
         <!--
             Cloud Auto Backup is not appropriate for photo-heavy wardrobes.
-            The in-app .mwbackup flow is the portable backup source of truth.
+            The in-app .wearfolio flow is the portable backup source of truth.
         -->
         <exclude domain="file" path="profiles/" />
         <exclude domain="file" path="profiles.json" />

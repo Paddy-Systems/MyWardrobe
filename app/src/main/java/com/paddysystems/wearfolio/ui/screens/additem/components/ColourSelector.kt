@@ -1,0 +1,77 @@
+package com.paddysystems.wearfolio.ui.screens.additem.components
+
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.FilterChipDefaults
+import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.dp
+import com.paddysystems.wearfolio.data.model.wardrobeColours
+
+
+@Composable
+fun ColourSelector(
+    selectedColours: List<String>,
+    onColoursChanged: (List<String>) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            "COLOURS  ·  ${selectedColours.size}/3",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.primary
+        )
+
+        LazyRow(
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            contentPadding = PaddingValues(
+                vertical = 8.dp
+            )
+        ) {
+            items(wardrobeColours) { colour ->
+                val selected =
+                    colour in selectedColours
+
+                FilterChip(
+                    selected = selected,
+                    onClick = {
+                        val updatedColours =
+                            if (selected) {
+                                selectedColours - colour
+                            } else {
+                                if (selectedColours.size >= 3) {
+                                    selectedColours
+                                } else {
+                                    selectedColours + colour
+                                }
+                            }
+
+                        onColoursChanged(
+                            updatedColours
+                        )
+                    },
+                    label = {
+                        Text(
+                            colour.replaceFirstChar {
+                                it.uppercase()
+                            }
+                        )
+                    },
+                    colors = FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = MaterialTheme.colorScheme.secondaryContainer,
+                        selectedLabelColor = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                )
+            }
+        }
+    }
+}

@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.paddysystems.mywardrobe"
+    namespace = "com.paddysystems.wearfolio"
     compileSdk {
         version = release(37)
     }
 
     defaultConfig {
-        applicationId = "com.paddysystems.mywardrobe"
+        applicationId = "com.paddysystems.wearfolio"
         minSdk = 24
         targetSdk = 37
         versionCode = 2
