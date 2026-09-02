@@ -1,14 +1,14 @@
 package com.paddysystems.mywardrobe.ml
 
-import android.content.Context
+import ai.onnxruntime.OnnxTensor
 import ai.onnxruntime.OrtEnvironment
 import ai.onnxruntime.OrtSession
-import java.io.File
+import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Color
 import android.net.Uri
-import ai.onnxruntime.OnnxTensor
+import java.io.File
 import java.nio.FloatBuffer
 
 class FashionSigLipEncoder(
@@ -17,7 +17,7 @@ class FashionSigLipEncoder(
 
     private val environment = OrtEnvironment.getEnvironment()
 
-    private val session: OrtSession by lazy {
+    private val sessionDelegate = lazy {
         val modelFile = prepareModelFile()
 
         environment.createSession(
@@ -25,6 +25,9 @@ class FashionSigLipEncoder(
             OrtSession.SessionOptions()
         )
     }
+
+    private val session: OrtSession
+        get() = sessionDelegate.value
 
     private fun prepareModelFile(): File {
         val modelDirectory = File(
@@ -153,17 +156,8 @@ class FashionSigLipEncoder(
     }
 
     override fun close() {
-//        if (sessionInitialized()) {
-//            session.close()
-//        }
+        if (sessionDelegate.isInitialized()) {
+            sessionDelegate.value.close()
+        }
     }
-
-//    private fun sessionInitialized(): Boolean {
-//        return try {
-//            session
-//            true
-//        } catch (_: Exception) {
-//            false
-//        }
-//    }
 }

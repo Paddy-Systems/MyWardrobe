@@ -8,6 +8,8 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
@@ -19,6 +21,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import com.paddysystems.mywardrobe.data.model.referencedItemIds
+import com.paddysystems.mywardrobe.data.storage.WardrobeImportQueue
 import com.paddysystems.mywardrobe.data.storage.deleteWardrobeItem
 import com.paddysystems.mywardrobe.data.storage.loadOutfits
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
@@ -33,9 +36,13 @@ import com.paddysystems.mywardrobe.ui.components.WardrobeActiveControls
 import com.paddysystems.mywardrobe.ui.components.WardrobeFilterDialog
 import com.paddysystems.mywardrobe.ui.components.WardrobeGrid
 import com.paddysystems.mywardrobe.ui.components.WardrobeHeader
+import com.paddysystems.mywardrobe.ui.components.WardrobeImportStatus
 import com.paddysystems.mywardrobe.ui.components.WardrobeSortDialog
 import com.paddysystems.mywardrobe.ui.components.WardrobeToolbar
 import com.paddysystems.mywardrobe.ui.theme.MyWardrobeTheme
+import com.paddysystems.mywardrobe.worker.WardrobeBatchImporter
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun WardrobeScreen(
@@ -59,6 +66,21 @@ fun WardrobeScreen(
         mutableStateListOf<WardrobeItem>().apply {
             addAll(loadWardrobeItems(context))
         }
+    }
+
+    val importFlow = remember(context) {
+        WardrobeImportQueue.observe(context.applicationContext)
+    }
+    val pendingImports by importFlow.collectAsState()
+    val pendingImportIds = pendingImports.map { it.id }
+
+    LaunchedEffect(refreshKey, pendingImportIds) {
+        val reloadedItems = withContext(Dispatchers.IO) {
+            loadWardrobeItems(context.applicationContext)
+        }
+
+        items.clear()
+        items.addAll(reloadedItems)
     }
 
     val filteredItems = WardrobeFilterEngine.filter(
@@ -89,20 +111,21 @@ fun WardrobeScreen(
             .padding(horizontal = 20.dp, vertical = 22.dp)
     ) {
         WardrobeHeader(
-            itemCount = visibleItems.size,
-            totalItemCount = items.size,
+            itemCount = visibleItems.size + pendingImports.size,
+            totalItemCount = items.size + pendingImports.size,
             selectedCount = selectedItems.size
         )
 
         SelectionActions(
             selectedCount = selectedItems.size,
-            onCancel = {
-                selectedItems.clear()
-            },
-            onDelete = {
-                showDeleteConfirmation = true
-            }
+            onCancel = { selectedItems.clear() },
+            onDelete = { showDeleteConfirmation = true }
         )
+
+        if (pendingImports.isNotEmpty()) {
+            Spacer(Modifier.height(12.dp))
+            WardrobeImportStatus(imports = pendingImports)
+        }
 
         Spacer(Modifier.height(12.dp))
 
@@ -118,12 +141,8 @@ fun WardrobeScreen(
             },
             activeFilterCount = filters.activeCount,
             sortIsActive = sortOrder != WardrobeSortOrder.AUTO,
-            onFilterClick = {
-                showFilterDialog = true
-            },
-            onSortClick = {
-                showSortDialog = true
-            }
+            onFilterClick = { showFilterDialog = true },
+            onSortClick = { showSortDialog = true }
         )
 
         Spacer(Modifier.height(14.dp))
@@ -148,7 +167,6 @@ fun WardrobeScreen(
                     selectedItems.clear()
                 }
             )
-
             Spacer(Modifier.height(8.dp))
         }
 
@@ -156,13 +174,33 @@ fun WardrobeScreen(
 
         WardrobeGrid(
             items = visibleItems,
+            pendingImports = pendingImports,
             selectedItems = selectedItems,
-            emptyMessage = if (items.isEmpty()) {
+            emptyMessage = if (items.isEmpty() && pendingImports.isEmpty()) {
                 "No items yet"
             } else {
                 "No matching items"
             },
             modifier = Modifier.weight(1f),
+            onImportRetry = { pendingImport ->
+                if (
+                    WardrobeImportQueue.markQueued(
+                        context = context.applicationContext,
+                        importId = pendingImport.id
+                    ) != null
+                ) {
+                    WardrobeBatchImporter.retry(
+                        context = context.applicationContext,
+                        importId = pendingImport.id
+                    )
+                }
+            },
+            onImportRemove = { pendingImport ->
+                WardrobeImportQueue.discardImport(
+                    context = context.applicationContext,
+                    importId = pendingImport.id
+                )
+            },
             onItemClick = { item ->
                 if (selectedItems.isNotEmpty()) {
                     if (selectedItems.contains(item)) {
@@ -191,9 +229,7 @@ fun WardrobeScreen(
                     selectedItems.clear()
                     showFilterDialog = false
                 },
-                onDismiss = {
-                    showFilterDialog = false
-                }
+                onDismiss = { showFilterDialog = false }
             )
         }
 
@@ -205,17 +241,12 @@ fun WardrobeScreen(
                     selectedItems.clear()
                     showSortDialog = false
                 },
-                onDismiss = {
-                    showSortDialog = false
-                }
+                onDismiss = { showSortDialog = false }
             )
         }
 
         if (showDeleteConfirmation) {
-            val selectedIds = selectedItems
-                .map { it.id }
-                .toSet()
-
+            val selectedIds = selectedItems.map { it.id }.toSet()
             val affectedOutfitCount = loadOutfits(context)
                 .count { outfit ->
                     outfit.referencedItemIds().any { it in selectedIds }
@@ -224,9 +255,7 @@ fun WardrobeScreen(
             DeleteConfirmationDialog(
                 selectedCount = selectedItems.size,
                 affectedOutfitCount = affectedOutfitCount,
-                onDismiss = {
-                    showDeleteConfirmation = false
-                },
+                onDismiss = { showDeleteConfirmation = false },
                 onConfirm = {
                     val itemsToDelete = selectedItems.toList()
                     var changed = false

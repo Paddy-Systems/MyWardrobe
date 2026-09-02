@@ -2,11 +2,15 @@ package com.paddysystems.mywardrobe
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.content.FileProvider
 import java.io.File
 import java.util.UUID
-import androidx.core.content.FileProvider
 
-fun saveImage(context: Context, uri: Uri): File? {
+fun saveImage(
+    context: Context,
+    uri: Uri,
+    imageId: String = UUID.randomUUID().toString()
+): File? {
     val imageDirectory = File(
         context.filesDir,
         "wardrobe_images"
@@ -16,20 +20,28 @@ fun saveImage(context: Context, uri: Uri): File? {
 
     val imageFile = File(
         imageDirectory,
-        "${UUID.randomUUID()}.jpg"
+        "$imageId.jpg"
     )
 
     return try {
-        context.contentResolver
+        val copied = context.contentResolver
             .openInputStream(uri)
             ?.use { input ->
                 imageFile.outputStream().use { output ->
                     input.copyTo(output)
                 }
+                true
             }
+            ?: false
 
-        imageFile
+        if (copied) {
+            imageFile
+        } else {
+            imageFile.delete()
+            null
+        }
     } catch (exception: Exception) {
+        imageFile.delete()
         null
     }
 }

@@ -22,19 +22,43 @@ fun saveWardrobeItem(
 ): WardrobeItem? {
     val imageFile = saveImage(context, imageUri) ?: return null
 
+    val item = saveWardrobeItemFromImageFile(
+        context = context,
+        imageFile = imageFile,
+        clothingTypeId = clothingTypeId,
+        colours = colours,
+        imageEmbedding = imageEmbedding,
+        metadata = metadata
+    )
+
+    if (item == null) {
+        imageFile.delete()
+    }
+
+    return item
+}
+
+fun saveWardrobeItemFromImageFile(
+    context: Context,
+    imageFile: File,
+    clothingTypeId: String,
+    colours: List<String>,
+    imageEmbedding: FloatArray,
+    metadata: WardrobeMetadata
+): WardrobeItem? {
+    if (!imageFile.exists()) {
+        return null
+    }
+
     val item = WardrobeItem(
         id = imageFile.nameWithoutExtension,
         imagePath = imageFile.absolutePath,
         clothingTypeId = clothingTypeId,
         colours = colours,
-        createdAt = System.currentTimeMillis(),
+        createdAt = imageFile.lastModified().takeIf { it > 0L }
+            ?: System.currentTimeMillis(),
         metadata = metadata
     )
-
-    val itemDirectory = File(context.filesDir, "wardrobe_items")
-    itemDirectory.mkdirs()
-
-    val itemFile = File(itemDirectory, "${item.id}.json")
 
     return try {
         saveWardrobeItemEmbedding(
@@ -43,12 +67,14 @@ fun saveWardrobeItem(
             embedding = imageEmbedding
         )
 
-        itemFile.writeText(wardrobeItemToJson(item).toString())
-        item
+        if (!writeWardrobeItem(context, item)) {
+            getEmbeddingFile(context, item.id).delete()
+            null
+        } else {
+            item
+        }
     } catch (exception: Exception) {
-        imageFile.delete()
         getEmbeddingFile(context, item.id).delete()
-        itemFile.delete()
         null
     }
 }
