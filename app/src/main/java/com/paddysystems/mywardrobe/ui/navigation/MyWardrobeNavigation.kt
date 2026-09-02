@@ -13,12 +13,14 @@ import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.paddysystems.mywardrobe.WardrobeScreen
+import com.paddysystems.mywardrobe.data.model.Profile
 import com.paddysystems.mywardrobe.ui.screens.additem.AddItemScreen
 import com.paddysystems.mywardrobe.ui.screens.createoutfit.CreateOutfitScreen
 import com.paddysystems.mywardrobe.ui.screens.edititem.EditItemScreen
 import com.paddysystems.mywardrobe.ui.screens.itemdetails.ItemDetailsScreen
 import com.paddysystems.mywardrobe.ui.screens.outfits.OutfitDetailsScreen
 import com.paddysystems.mywardrobe.ui.screens.outfits.OutfitsScreen
+import com.paddysystems.mywardrobe.ui.screens.profiles.ManageProfilesScreen
 
 private object Routes {
     const val WARDROBE = "wardrobe"
@@ -29,6 +31,7 @@ private object Routes {
     const val OUTFITS = "outfits"
     const val OUTFIT_DETAILS = "outfit-details/{outfitId}"
     const val EDIT_OUTFIT = "edit-outfit/{outfitId}"
+    const val PROFILES = "profiles"
 
     fun itemDetails(itemId: String): String = "item-details/$itemId"
     fun editItem(itemId: String): String = "edit-item/$itemId"
@@ -38,6 +41,7 @@ private object Routes {
 
 @Composable
 fun MyWardrobeNavigation(
+    onSwitchProfile: (Profile) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val navController = rememberNavController()
@@ -98,6 +102,24 @@ fun MyWardrobeNavigation(
                     },
                     onItemClick = { item ->
                         navController.navigate(Routes.itemDetails(item.id))
+                    },
+                    onManageWardrobes = {
+                        navController.navigate(Routes.PROFILES)
+                    }
+                )
+            }
+
+            composable(Routes.PROFILES) {
+                ManageProfilesScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onProfileSwitched = { profile ->
+                        onSwitchProfile(profile)
+                        navController.popBackStack(
+                            route = Routes.WARDROBE,
+                            inclusive = false
+                        )
                     }
                 )
             }

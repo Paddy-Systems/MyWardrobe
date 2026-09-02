@@ -33,6 +33,7 @@ import com.paddysystems.mywardrobe.data.storage.deleteWardrobeItem
 import com.paddysystems.mywardrobe.data.storage.loadOutfitsUsingItem
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItem
 import com.paddysystems.mywardrobe.data.storage.updateWardrobeItem
+import com.paddysystems.mywardrobe.ui.LocalActiveProfile
 import com.paddysystems.mywardrobe.ui.components.DeleteConfirmationDialog
 import com.paddysystems.mywardrobe.ui.components.EditorialDangerButton
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
@@ -52,11 +53,13 @@ fun EditItemScreen(
     onDeleted: () -> Unit
 ) {
     val context = LocalContext.current
+    val profileId = LocalActiveProfile.current.id
     val scope = rememberCoroutineScope()
 
-    val item = remember(itemId) {
+    val item = remember(itemId, profileId) {
         loadWardrobeItem(
             context = context,
+            profileId = profileId,
             itemId = itemId
         )
     }
@@ -96,9 +99,10 @@ fun EditItemScreen(
         mutableStateOf<String?>(null)
     }
 
-    val affectedOutfitCount = remember(itemId) {
+    val affectedOutfitCount = remember(itemId, profileId) {
         loadOutfitsUsingItem(
             context = context,
+            profileId = profileId,
             itemId = itemId
         ).size
     }
@@ -165,6 +169,7 @@ fun EditItemScreen(
                     val saved = withContext(Dispatchers.IO) {
                         updateWardrobeItem(
                             context = context.applicationContext,
+                            profileId = profileId,
                             item = item,
                             clothingTypeId = selectedClothingTypeId,
                             colours = selectedColours
@@ -215,6 +220,7 @@ fun EditItemScreen(
                     val deleted = withContext(Dispatchers.IO) {
                         deleteWardrobeItem(
                             context = context.applicationContext,
+                            profileId = profileId,
                             item = item
                         )
                     }

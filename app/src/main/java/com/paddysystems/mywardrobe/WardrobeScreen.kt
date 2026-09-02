@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -19,6 +20,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import com.paddysystems.mywardrobe.data.model.Profile
 import com.paddysystems.mywardrobe.data.model.WardrobeItem
 import com.paddysystems.mywardrobe.data.model.referencedItemIds
 import com.paddysystems.mywardrobe.data.storage.WardrobeImportQueue
@@ -39,6 +41,7 @@ import com.paddysystems.mywardrobe.ui.components.WardrobeHeader
 import com.paddysystems.mywardrobe.ui.components.WardrobeImportStatus
 import com.paddysystems.mywardrobe.ui.components.WardrobeSortDialog
 import com.paddysystems.mywardrobe.ui.components.WardrobeToolbar
+import com.paddysystems.mywardrobe.ui.LocalActiveProfile
 import com.paddysystems.mywardrobe.ui.theme.MyWardrobeTheme
 import com.paddysystems.mywardrobe.worker.WardrobeBatchImporter
 import kotlinx.coroutines.Dispatchers
@@ -49,9 +52,12 @@ fun WardrobeScreen(
     modifier: Modifier = Modifier,
     refreshKey: Int = 0,
     onWardrobeChanged: () -> Unit = {},
-    onItemClick: (WardrobeItem) -> Unit = {}
+    onItemClick: (WardrobeItem) -> Unit = {},
+    onManageWardrobes: () -> Unit = {}
 ) {
     val context = LocalContext.current
+    val profile = LocalActiveProfile.current
+    val profileId = profile.id
 
     var searchQuery by remember { mutableStateOf("") }
     var filters by remember { mutableStateOf(WardrobeFilters()) }
@@ -62,21 +68,21 @@ fun WardrobeScreen(
 
     val selectedItems = remember { mutableStateListOf<WardrobeItem>() }
 
-    val items = remember(refreshKey) {
+    val items = remember(refreshKey, profileId) {
         mutableStateListOf<WardrobeItem>().apply {
-            addAll(loadWardrobeItems(context))
+            addAll(loadWardrobeItems(context, profileId))
         }
     }
 
-    val importFlow = remember(context) {
-        WardrobeImportQueue.observe(context.applicationContext)
+    val importFlow = remember(context, profileId) {
+        WardrobeImportQueue.observe(context.applicationContext, profileId)
     }
     val pendingImports by importFlow.collectAsState()
     val pendingImportIds = pendingImports.map { it.id }
 
-    LaunchedEffect(refreshKey, pendingImportIds) {
+    LaunchedEffect(refreshKey, profileId, pendingImportIds) {
         val reloadedItems = withContext(Dispatchers.IO) {
-            loadWardrobeItems(context.applicationContext)
+            loadWardrobeItems(context.applicationContext, profileId)
         }
 
         items.clear()
@@ -111,9 +117,11 @@ fun WardrobeScreen(
             .padding(horizontal = 20.dp, vertical = 22.dp)
     ) {
         WardrobeHeader(
+            profileName = profile.name,
             itemCount = visibleItems.size + pendingImports.size,
             totalItemCount = items.size + pendingImports.size,
-            selectedCount = selectedItems.size
+            selectedCount = selectedItems.size,
+            onManageWardrobes = onManageWardrobes
         )
 
         SelectionActions(
@@ -186,11 +194,13 @@ fun WardrobeScreen(
                 if (
                     WardrobeImportQueue.markQueued(
                         context = context.applicationContext,
+                        profileId = profileId,
                         importId = pendingImport.id
                     ) != null
                 ) {
                     WardrobeBatchImporter.retry(
                         context = context.applicationContext,
+                        profileId = profileId,
                         importId = pendingImport.id
                     )
                 }
@@ -198,6 +208,7 @@ fun WardrobeScreen(
             onImportRemove = { pendingImport ->
                 WardrobeImportQueue.discardImport(
                     context = context.applicationContext,
+                    profileId = profileId,
                     importId = pendingImport.id
                 )
             },
@@ -247,7 +258,7 @@ fun WardrobeScreen(
 
         if (showDeleteConfirmation) {
             val selectedIds = selectedItems.map { it.id }.toSet()
-            val affectedOutfitCount = loadOutfits(context)
+            val affectedOutfitCount = loadOutfits(context, profileId)
                 .count { outfit ->
                     outfit.referencedItemIds().any { it in selectedIds }
                 }
@@ -264,6 +275,7 @@ fun WardrobeScreen(
                         if (
                             deleteWardrobeItem(
                                 context = context,
+                                profileId = profileId,
                                 item = item
                             )
                         ) {
@@ -288,6 +300,10 @@ fun WardrobeScreen(
 @Composable
 fun WardrobePreview() {
     MyWardrobeTheme {
-        WardrobeScreen()
+        CompositionLocalProvider(
+            LocalActiveProfile provides Profile(id = "preview", name = "Preview")
+        ) {
+            WardrobeScreen()
+        }
     }
 }

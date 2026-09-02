@@ -45,6 +45,7 @@ import com.paddysystems.mywardrobe.data.model.outfitPlacement
 import com.paddysystems.mywardrobe.data.storage.loadOutfit
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
 import com.paddysystems.mywardrobe.data.storage.saveOutfit
+import com.paddysystems.mywardrobe.ui.LocalActiveProfile
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
 import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 import com.paddysystems.mywardrobe.ui.components.EditorialSecondaryButton
@@ -67,12 +68,14 @@ fun CreateOutfitScreen(
     onSaved: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val profileId = LocalActiveProfile.current.id
     val scope = rememberCoroutineScope()
 
-    val editingOutfit = remember(outfitId) {
+    val editingOutfit = remember(outfitId, profileId) {
         outfitId?.let {
             loadOutfit(
                 context = context,
+                profileId = profileId,
                 outfitId = it
             )
         }
@@ -113,8 +116,8 @@ fun CreateOutfitScreen(
         mutableStateOf<String?>(null)
     }
 
-    val wardrobeItems = remember {
-        loadWardrobeItems(context)
+    val wardrobeItems = remember(profileId) {
+        loadWardrobeItems(context, profileId)
     }
 
     val topItems = remember(wardrobeItems) {
@@ -771,6 +774,7 @@ fun CreateOutfitScreen(
                                 context =
                                     context
                                         .applicationContext,
+                                profileId = profileId,
                                 outfit = outfit
                             )
                         }

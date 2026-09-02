@@ -18,14 +18,20 @@ object WardrobeImportQueue {
     private val importsFlow = MutableStateFlow<List<WardrobeImport>>(emptyList())
 
     @Synchronized
-    fun observe(context: Context): StateFlow<List<WardrobeImport>> {
-        refresh(context.applicationContext)
+    fun observe(
+        context: Context,
+        profileId: String
+    ): StateFlow<List<WardrobeImport>> {
+        refresh(context.applicationContext, profileId)
         return importsFlow.asStateFlow()
     }
 
     @Synchronized
-    fun loadImports(context: Context): List<WardrobeImport> {
-        val directory = queueDirectory(context)
+    fun loadImports(
+        context: Context,
+        profileId: String
+    ): List<WardrobeImport> {
+        val directory = queueDirectory(context, profileId)
 
         if (!directory.exists()) {
             return emptyList()
@@ -46,9 +52,10 @@ object WardrobeImportQueue {
     @Synchronized
     fun findImport(
         context: Context,
+        profileId: String,
         importId: String
     ): WardrobeImport? {
-        val file = queueFile(context, importId)
+        val file = queueFile(context, profileId, importId)
 
         if (!file.exists()) {
             return null
@@ -62,6 +69,7 @@ object WardrobeImportQueue {
     @Synchronized
     fun stageImages(
         context: Context,
+        profileId: String,
         imageUris: List<Uri>
     ): List<WardrobeImport> {
         val applicationContext = context.applicationContext
@@ -71,6 +79,7 @@ object WardrobeImportQueue {
             val id = UUID.randomUUID().toString()
             val imageFile = saveImage(
                 context = applicationContext,
+                profileId = profileId,
                 uri = uri,
                 imageId = id
             ) ?: return@mapIndexedNotNull null
@@ -82,7 +91,7 @@ object WardrobeImportQueue {
                 status = WardrobeImportStatus.QUEUED
             )
 
-            if (writeImport(applicationContext, item)) {
+            if (writeImport(applicationContext, profileId, item)) {
                 item
             } else {
                 imageFile.delete()
@@ -90,17 +99,19 @@ object WardrobeImportQueue {
             }
         }
 
-        refresh(applicationContext)
+        refresh(applicationContext, profileId)
         return staged
     }
 
     @Synchronized
     fun markQueued(
         context: Context,
+        profileId: String,
         importId: String
     ): WardrobeImport? {
         return updateStatus(
             context = context,
+            profileId = profileId,
             importId = importId,
             status = WardrobeImportStatus.QUEUED,
             errorMessage = null
@@ -110,10 +121,12 @@ object WardrobeImportQueue {
     @Synchronized
     fun markProcessing(
         context: Context,
+        profileId: String,
         importId: String
     ): WardrobeImport? {
         return updateStatus(
             context = context,
+            profileId = profileId,
             importId = importId,
             status = WardrobeImportStatus.PROCESSING,
             errorMessage = null
@@ -123,11 +136,13 @@ object WardrobeImportQueue {
     @Synchronized
     fun markFailed(
         context: Context,
+        profileId: String,
         importId: String,
         errorMessage: String?
     ): WardrobeImport? {
         return updateStatus(
             context = context,
+            profileId = profileId,
             importId = importId,
             status = WardrobeImportStatus.FAILED,
             errorMessage = errorMessage?.take(180)
@@ -137,29 +152,31 @@ object WardrobeImportQueue {
     @Synchronized
     fun completeImport(
         context: Context,
+        profileId: String,
         importId: String
     ) {
-        queueFile(context, importId).delete()
-        refresh(context.applicationContext)
+        queueFile(context, profileId, importId).delete()
+        refresh(context.applicationContext, profileId)
     }
 
     @Synchronized
     fun discardImport(
         context: Context,
+        profileId: String,
         importId: String
     ): Boolean {
         val applicationContext = context.applicationContext
-        val import = findImport(applicationContext, importId)
+        val import = findImport(applicationContext, profileId, importId)
 
         if (import == null) {
-            refresh(applicationContext)
+            refresh(applicationContext, profileId)
             return true
         }
 
-        val queueDeleted = queueFile(applicationContext, importId).delete()
+        val queueDeleted = queueFile(applicationContext, profileId, importId).delete()
 
         val finishedItemExists =
-            loadWardrobeItem(applicationContext, importId) != null
+            loadWardrobeItem(applicationContext, profileId, importId) != null
 
         val imageDeleted = if (finishedItemExists) {
             true
@@ -168,45 +185,50 @@ object WardrobeImportQueue {
             !imageFile.exists() || imageFile.delete()
         }
 
-        refresh(applicationContext)
+        refresh(applicationContext, profileId)
         return queueDeleted && imageDeleted
     }
 
     @Synchronized
-    fun refresh(context: Context) {
-        importsFlow.value = loadImports(context.applicationContext)
+    fun refresh(
+        context: Context,
+        profileId: String
+    ) {
+        importsFlow.value = loadImports(context.applicationContext, profileId)
     }
 
     private fun updateStatus(
         context: Context,
+        profileId: String,
         importId: String,
         status: WardrobeImportStatus,
         errorMessage: String?
     ): WardrobeImport? {
         val applicationContext = context.applicationContext
-        val existing = findImport(applicationContext, importId) ?: return null
+        val existing = findImport(applicationContext, profileId, importId) ?: return null
         val updated = existing.copy(
             status = status,
             errorMessage = errorMessage
         )
 
-        if (!writeImport(applicationContext, updated)) {
+        if (!writeImport(applicationContext, profileId, updated)) {
             return null
         }
 
-        refresh(applicationContext)
+        refresh(applicationContext, profileId)
         return updated
     }
 
     private fun writeImport(
         context: Context,
+        profileId: String,
         item: WardrobeImport
     ): Boolean {
-        val directory = queueDirectory(context)
+        val directory = queueDirectory(context, profileId)
         directory.mkdirs()
 
         return runCatching {
-            queueFile(context, item.id).writeText(
+            queueFile(context, profileId, item.id).writeText(
                 JSONObject()
                     .put("id", item.id)
                     .put("imagePath", item.imagePath)
@@ -239,14 +261,18 @@ object WardrobeImportQueue {
         )
     }
 
-    private fun queueDirectory(context: Context): File {
-        return File(context.filesDir, DIRECTORY_NAME)
+    private fun queueDirectory(
+        context: Context,
+        profileId: String
+    ): File {
+        return File(ProfileStorage.profileDirectory(context, profileId), DIRECTORY_NAME)
     }
 
     private fun queueFile(
         context: Context,
+        profileId: String,
         importId: String
     ): File {
-        return File(queueDirectory(context), "$importId.json")
+        return File(queueDirectory(context, profileId), "$importId.json")
     }
 }

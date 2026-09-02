@@ -3,16 +3,18 @@ package com.paddysystems.mywardrobe
 import android.content.Context
 import android.net.Uri
 import androidx.core.content.FileProvider
+import com.paddysystems.mywardrobe.data.storage.ProfileStorage
 import java.io.File
 import java.util.UUID
 
 fun saveImage(
     context: Context,
+    profileId: String,
     uri: Uri,
     imageId: String = UUID.randomUUID().toString()
 ): File? {
     val imageDirectory = File(
-        context.filesDir,
+        ProfileStorage.profileDirectory(context, profileId),
         "wardrobe_images"
     )
 
@@ -46,9 +48,12 @@ fun saveImage(
     }
 }
 
-fun loadImages(context: Context): List<File> {
+fun loadImages(
+    context: Context,
+    profileId: String
+): List<File> {
     val imageDirectory = File(
-        context.filesDir,
+        ProfileStorage.profileDirectory(context, profileId),
         "wardrobe_images"
     )
 
