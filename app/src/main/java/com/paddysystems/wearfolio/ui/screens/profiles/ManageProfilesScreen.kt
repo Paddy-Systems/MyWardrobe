@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
+import androidx.compose.material.icons.outlined.AccountCircle
 import androidx.compose.material.icons.outlined.Check
 import androidx.compose.material.icons.outlined.SettingsBackupRestore
 import androidx.compose.material3.Icon
@@ -40,6 +41,7 @@ fun ManageProfilesScreen(
     onBack: () -> Unit,
     onProfileSwitched: (Profile) -> Unit,
     onDataManagement: () -> Unit = {},
+    onAccount: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -222,6 +224,24 @@ fun ManageProfilesScreen(
                     Modifier.fillMaxWidth()
             )
         }
+
+        Spacer(
+            Modifier.height(
+                12.dp
+            )
+        )
+
+        EditorialSecondaryButton(
+            text =
+                "Wearfolio account",
+            icon =
+                Icons.Outlined
+                    .AccountCircle,
+            onClick =
+                onAccount,
+            modifier =
+                Modifier.fillMaxWidth()
+        )
 
         Spacer(
             Modifier.height(

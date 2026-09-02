@@ -14,6 +14,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import com.paddysystems.wearfolio.WardrobeScreen
 import com.paddysystems.wearfolio.data.model.Profile
+import com.paddysystems.wearfolio.ui.screens.account.AccountRoute
 import com.paddysystems.wearfolio.ui.screens.additem.AddItemScreen
 import com.paddysystems.wearfolio.ui.screens.createoutfit.CreateOutfitScreen
 import com.paddysystems.wearfolio.ui.screens.datamanagement.DataManagementScreen
@@ -34,6 +35,7 @@ private object Routes {
     const val EDIT_OUTFIT = "edit-outfit/{outfitId}"
     const val PROFILES = "profiles"
     const val DATA_MANAGEMENT = "data-management"
+    const val ACCOUNT = "account"
 
     fun itemDetails(itemId: String): String = "item-details/$itemId"
     fun editItem(itemId: String): String = "edit-item/$itemId"
@@ -132,6 +134,19 @@ fun WearfolioNavigation(
                         navController.navigate(
                             Routes.DATA_MANAGEMENT
                         )
+                    },
+                    onAccount = {
+                        navController.navigate(
+                            Routes.ACCOUNT
+                        )
+                    }
+                )
+            }
+
+            composable(Routes.ACCOUNT) {
+                AccountRoute(
+                    onBack = {
+                        navController.popBackStack()
                     }
                 )
             }

@@ -7,14 +7,26 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.paddysystems.wearfolio.WearfolioApplication
 import com.paddysystems.wearfolio.data.backup.WardrobeBackupService
 import com.paddysystems.wearfolio.data.storage.ProfileStorage
 import com.paddysystems.wearfolio.ui.navigation.WearfolioNavigation
+import com.paddysystems.wearfolio.ui.screens.account.AccountRoute
 import com.paddysystems.wearfolio.ui.screens.onboarding.OnboardingScreen
 
 @Composable
 fun WearfolioApp() {
     val context = LocalContext.current
+    val application =
+        context.applicationContext as WearfolioApplication
+
+    val session by
+        application
+            .appContainer
+            .sessionStore
+            .session
+            .collectAsStateWithLifecycle()
 
     val initialProfile = remember(context) {
         WardrobeBackupService
@@ -22,9 +34,16 @@ fun WearfolioApp() {
                 context.applicationContext
             )
 
-        ProfileStorage.loadActiveProfile(
-            context
-        )
+        ProfileStorage.loadActiveProfile(context)
+            ?: ProfileStorage
+                .loadProfiles(context)
+                .firstOrNull()
+                ?.also { profile ->
+                    ProfileStorage.setActiveProfile(
+                        context = context,
+                        profileId = profile.id
+                    )
+                }
     }
 
     var activeProfile by remember {
@@ -33,24 +52,30 @@ fun WearfolioApp() {
         )
     }
 
-    val profile = activeProfile
+    when {
+        session == null -> {
+            AccountRoute()
+        }
 
-    if (profile == null) {
-        OnboardingScreen(
-            onProfileCreated = {
-                activeProfile = it
-            }
-        )
-    } else {
-        CompositionLocalProvider(
-            LocalActiveProfile provides
-                profile
-        ) {
-            WearfolioNavigation(
-                onSwitchProfile = {
+        activeProfile == null -> {
+            OnboardingScreen(
+                onProfileCreated = {
                     activeProfile = it
                 }
             )
+        }
+
+        else -> {
+            CompositionLocalProvider(
+                LocalActiveProfile provides
+                    requireNotNull(activeProfile)
+            ) {
+                WearfolioNavigation(
+                    onSwitchProfile = {
+                        activeProfile = it
+                    }
+                )
+            }
         }
     }
 }
