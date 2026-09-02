@@ -16,6 +16,7 @@ import com.paddysystems.mywardrobe.WardrobeScreen
 import com.paddysystems.mywardrobe.data.model.Profile
 import com.paddysystems.mywardrobe.ui.screens.additem.AddItemScreen
 import com.paddysystems.mywardrobe.ui.screens.createoutfit.CreateOutfitScreen
+import com.paddysystems.mywardrobe.ui.screens.datamanagement.DataManagementScreen
 import com.paddysystems.mywardrobe.ui.screens.edititem.EditItemScreen
 import com.paddysystems.mywardrobe.ui.screens.itemdetails.ItemDetailsScreen
 import com.paddysystems.mywardrobe.ui.screens.outfits.OutfitDetailsScreen
@@ -32,6 +33,7 @@ private object Routes {
     const val OUTFIT_DETAILS = "outfit-details/{outfitId}"
     const val EDIT_OUTFIT = "edit-outfit/{outfitId}"
     const val PROFILES = "profiles"
+    const val DATA_MANAGEMENT = "data-management"
 
     fun itemDetails(itemId: String): String = "item-details/$itemId"
     fun editItem(itemId: String): String = "edit-item/$itemId"
@@ -59,11 +61,15 @@ fun MyWardrobeNavigation(
 
     val selectedDestination = when (currentRoute) {
         Routes.ADD_ITEM -> MyWardrobeDestination.ADD
+
         Routes.OUTFITS,
         Routes.CREATE_OUTFIT,
         Routes.OUTFIT_DETAILS,
-        Routes.EDIT_OUTFIT -> MyWardrobeDestination.OUTFITS
-        else -> MyWardrobeDestination.WARDROBE
+        Routes.EDIT_OUTFIT ->
+            MyWardrobeDestination.OUTFITS
+
+        else ->
+            MyWardrobeDestination.WARDROBE
     }
 
     Scaffold(
@@ -116,6 +122,30 @@ fun MyWardrobeNavigation(
                     },
                     onProfileSwitched = { profile ->
                         onSwitchProfile(profile)
+
+                        navController.popBackStack(
+                            route = Routes.WARDROBE,
+                            inclusive = false
+                        )
+                    },
+                    onDataManagement = {
+                        navController.navigate(
+                            Routes.DATA_MANAGEMENT
+                        )
+                    }
+                )
+            }
+
+            composable(Routes.DATA_MANAGEMENT) {
+                DataManagementScreen(
+                    onBack = {
+                        navController.popBackStack()
+                    },
+                    onRestored = { profile ->
+                        wardrobeRefreshKey++
+                        outfitsRefreshKey++
+                        onSwitchProfile(profile)
+
                         navController.popBackStack(
                             route = Routes.WARDROBE,
                             inclusive = false
