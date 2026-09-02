@@ -38,7 +38,7 @@ import com.paddysystems.mywardrobe.ui.components.EditorialDangerButton
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
 import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 import com.paddysystems.mywardrobe.ui.screens.additem.components.ClothingTypeSelector
-import com.paddystems.mywardrobe.ui.screens.additem.components.ColourSelector
+import com.paddysystems.mywardrobe.ui.screens.additem.components.ColourSelector
 import java.io.File
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -76,7 +76,7 @@ fun EditItemScreen(
         return
     }
 
-    var selectedClothingTypeId by rememer(itemId) {
+    var selectedClothingTypeId by remember(itemId) {
         mutableStateOf(item.clothingTypeId)
     }
 
