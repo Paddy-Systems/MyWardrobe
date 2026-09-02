@@ -16,3 +16,4 @@
 local.properties
 app/src/main/assets/models/vision_model_fp16.onnx
 app/src/main/assets/models/isnet_general_use_quantized.onnx
+.gpt_work
