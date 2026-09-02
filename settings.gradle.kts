@@ -22,6 +22,5 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "My Wardrobe"
+rootProject.name = "Wearfolio"
 include(":app")
- 

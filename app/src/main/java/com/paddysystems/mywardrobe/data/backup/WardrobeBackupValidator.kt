@@ -27,7 +27,7 @@ object WardrobeBackupValidator {
         val formatVersion = manifestJson.optInt("formatVersion", -1)
         if (formatVersion != CURRENT_BACKUP_VERSION) {
             return invalid(
-                "Backup format $formatVersion is not supported by this version of MyWardrobe.",
+                "Backup format $formatVersion is not supported by this version of Wearfolio.",
                 formatVersion
             )
         }
@@ -112,7 +112,7 @@ object WardrobeBackupValidator {
             warnings += "The manifest wardrobe-item count differs from the archive contents."
         }
         if (expectedOutfits != outfitCount) {
-            warnings += "The manifest saved-look count differs from the archive contents."
+            warnings += "The manifest saved-fit count differs from the archive contents."
         }
 
         val totalBytes = root.walkTopDown()
@@ -200,7 +200,7 @@ object WardrobeBackupValidator {
         val outfitsDirectory = File(profileDirectory, "outfits")
         if (!outfitsDirectory.exists()) return 0
         if (!outfitsDirectory.isDirectory) {
-            errors += "Wardrobe $profileId has an invalid outfits entry."
+            errors += "Wardrobe $profileId has an invalid saved-fits entry."
             return 0
         }
 
@@ -212,13 +212,13 @@ object WardrobeBackupValidator {
                 val json = runCatching {
                     JSONObject(outfitFile.readText())
                 }.getOrElse {
-                    errors += "Wardrobe $profileId contains an unreadable saved look: ${outfitFile.name}."
+                    errors += "Wardrobe $profileId contains an unreadable saved fit: ${outfitFile.name}."
                     return@outfitLoop
                 }
 
                 val outfitId = json.optString("id").trim()
                 if (outfitId.isBlank()) {
-                    errors += "Wardrobe $profileId contains a saved look without an identifier."
+                    errors += "Wardrobe $profileId contains a saved fit without an identifier."
                     return@outfitLoop
                 }
 
@@ -226,7 +226,7 @@ object WardrobeBackupValidator {
 
                 val missing = referencedItemIds(json).filter { it !in validItemIds }
                 if (missing.isNotEmpty()) {
-                    warnings += "Saved look ${json.optString("name", outfitId)} in wardrobe $profileId references ${missing.size} missing piece(s)."
+                    warnings += "Saved fit ${json.optString("name", outfitId)} in wardrobe $profileId references ${missing.size} missing piece(s)."
                 }
             }
 

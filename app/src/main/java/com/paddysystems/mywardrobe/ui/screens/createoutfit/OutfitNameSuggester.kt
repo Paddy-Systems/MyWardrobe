@@ -68,7 +68,7 @@ fun suggestOutfitName(
             }
 
     if (selectedItems.isEmpty()) {
-        return "New Outfit"
+        return "New fit"
     }
 
     val dominantColour =
@@ -170,7 +170,7 @@ fun suggestOutfitName(
     val coreName =
         when {
             coreNames.isEmpty() ->
-                "Outfit"
+                "Fit"
 
             coreNames.size == 1 ->
                 coreNames.first()

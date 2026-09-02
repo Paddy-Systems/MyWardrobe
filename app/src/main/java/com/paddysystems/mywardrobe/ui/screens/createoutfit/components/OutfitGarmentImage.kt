@@ -31,7 +31,7 @@ fun OutfitGarmentImage(
         model = imageFile,
 
         contentDescription =
-            "Outfit clothing item",
+            "Fit clothing item",
 
         contentScale =
             ContentScale.Fit,

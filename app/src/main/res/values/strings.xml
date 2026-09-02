@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">My Wardrobe</string>
+    <string name="app_name">Wearfolio</string>
+    <string name="brand_tagline">See more in what you own.</string>
 </resources>

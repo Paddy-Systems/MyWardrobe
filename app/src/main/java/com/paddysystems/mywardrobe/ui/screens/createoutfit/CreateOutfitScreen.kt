@@ -89,9 +89,9 @@ fun CreateOutfitScreen(
                 .padding(top = 22.dp)
         ) {
             EditorialPageHeader(
-                eyebrow = "Edit saved look",
-                title = "Outfit unavailable",
-                subtitle = "This saved outfit could not be loaded.",
+                eyebrow = "Edit saved fit",
+                title = "Fit unavailable",
+                subtitle = "This saved fit could not be loaded.",
                 navigationIcon = if (onBack != null) {
                     Icons.AutoMirrored.Outlined.ArrowBack
                 } else {
@@ -278,15 +278,15 @@ fun CreateOutfitScreen(
     ) {
         EditorialPageHeader(
             eyebrow = if (isEditing) {
-                "Edit saved look"
+                "Edit saved fit"
             } else {
-                "Outfit studio"
+                "Fit studio"
             },
             title = if (isEditing) {
                 editableOutfit?.name
-                    ?: "Edit look"
+                    ?: "Edit fit"
             } else {
-                "Build a look"
+                "Build a fit"
             },
             subtitle = if (isEditing) {
                 "Adjust the layers and finishing pieces, then save your changes."
@@ -647,7 +647,7 @@ fun CreateOutfitScreen(
                     }
 
             EditorialSecondaryButton(
-                text = "Shuffle the look",
+                text = "Shuffle the fit",
                 icon = Icons.Outlined.AutoAwesome,
                 modifier = Modifier.fillMaxWidth(),
                 enabled = canShuffleWholeOutfit,
@@ -695,7 +695,7 @@ fun CreateOutfitScreen(
                         "Save changes"
 
                     else ->
-                        "Save outfit"
+                        "Save fit"
                 },
                 icon = Icons.Outlined.Save,
                 modifier = Modifier.fillMaxWidth(),
@@ -727,7 +727,7 @@ fun CreateOutfitScreen(
             title = if (isEditing) {
                 "Save your changes"
             } else {
-                "Name this look"
+                "Name this fit"
             },
             confirmText = if (isEditing) {
                 "Update"
@@ -786,9 +786,9 @@ fun CreateOutfitScreen(
                     } else {
                         saveError =
                             if (isEditing) {
-                                "Could not update outfit"
+                                "Could not update fit"
                             } else {
-                                "Could not save outfit"
+                                "Could not save fit"
                             }
                     }
                 }

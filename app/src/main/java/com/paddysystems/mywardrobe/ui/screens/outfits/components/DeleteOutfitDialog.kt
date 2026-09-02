@@ -15,7 +15,7 @@ fun DeleteOutfitDialog(
 ) {
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Delete outfit?") },
+        title = { Text("Delete fit?") },
         text = {
             Text(
                 "\"$outfitName\" will be permanently removed. " +

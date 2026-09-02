@@ -109,7 +109,7 @@ fun DataManagementScreen(
                         statusMessage =
                             "Backup created with ${manifest.profileCount} ${wardrobeWord(manifest.profileCount)}, " +
                                 "${manifest.wardrobeItemCount} ${pieceWord(manifest.wardrobeItemCount)} and " +
-                                "${manifest.outfitCount} saved ${lookWord(manifest.outfitCount)}."
+                                "${manifest.outfitCount} saved ${fitWord(manifest.outfitCount)}."
                     },
                     onFailure = { exception ->
                         errorMessage = exception.message ?: "Could not create the backup."
@@ -143,7 +143,7 @@ fun DataManagementScreen(
                 if (result.valid) {
                     inspection = result
                 } else {
-                    errorMessage = result.errorMessage ?: "This is not a valid MyWardrobe backup."
+                    errorMessage = result.errorMessage ?: "This is not a valid Wearfolio backup."
                 }
             }
         }
@@ -163,7 +163,7 @@ fun DataManagementScreen(
         EditorialPageHeader(
             eyebrow = "Your data",
             title = "Backup & restore",
-            subtitle = "Keep every wardrobe, original photo and saved look safe, or move them to another device.",
+            subtitle = "Keep every wardrobe, original photo and saved fit safe, or move them to another device.",
             navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
             onNavigate = onBack
         )
@@ -217,7 +217,7 @@ fun DataManagementScreen(
         Spacer(Modifier.height(26.dp))
         SectionLabel("BACKUP")
         Text(
-            "Create one portable .mwbackup file containing all wardrobes, item metadata, original photos, cut-outs, embeddings and saved looks.",
+            "Create one portable .mwbackup file containing all wardrobes, item metadata, original photos, cut-outs, embeddings and saved fits.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -238,7 +238,7 @@ fun DataManagementScreen(
 
         SectionLabel("RESTORE")
         Text(
-            "Inspect a MyWardrobe backup first, then explicitly replace the wardrobes stored on this device. Invalid archives never touch your current data.",
+            "Inspect a Wearfolio backup first, then explicitly replace the wardrobes stored on this device. Invalid archives never touch your current data.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
@@ -332,7 +332,7 @@ private fun DataSummaryCard(summary: WardrobeDataSummary?) {
                     )
                     SummaryMetric(
                         summary.outfitCount.toString(),
-                        "saved ${lookWord(summary.outfitCount)}"
+                        "saved ${fitWord(summary.outfitCount)}"
                     )
                     SummaryMetric(formatBytes(summary.totalBytes), "stored")
                 }
@@ -429,14 +429,14 @@ private fun RestoreConfirmationDialog(
                 Text(
                     "${inspection.profileCount} ${wardrobeWord(inspection.profileCount)} · " +
                         "${inspection.wardrobeItemCount} ${pieceWord(inspection.wardrobeItemCount)} · " +
-                        "${inspection.outfitCount} saved ${lookWord(inspection.outfitCount)}"
+                        "${inspection.outfitCount} saved ${fitWord(inspection.outfitCount)}"
                 )
 
                 currentSummary?.let {
                     Text(
                         "This device currently has ${it.profileCount} ${wardrobeWord(it.profileCount)}, " +
                             "${it.wardrobeItemCount} ${pieceWord(it.wardrobeItemCount)} and " +
-                            "${it.outfitCount} saved ${lookWord(it.outfitCount)}."
+                            "${it.outfitCount} saved ${fitWord(it.outfitCount)}."
                     )
                 }
 
@@ -497,4 +497,4 @@ private fun formatBytes(bytes: Long): String {
 
 private fun wardrobeWord(count: Int) = if (count == 1) "wardrobe" else "wardrobes"
 private fun pieceWord(count: Int) = if (count == 1) "piece" else "pieces"
-private fun lookWord(count: Int) = if (count == 1) "look" else "looks"
+private fun fitWord(count: Int) = if (count == 1) "fit" else "fits"

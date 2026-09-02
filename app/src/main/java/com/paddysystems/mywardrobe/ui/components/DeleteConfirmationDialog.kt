@@ -46,12 +46,12 @@ fun DeleteConfirmationDialog(
                         append("\n\n")
                         append(
                             if (affectedOutfitCount == 1) {
-                                "1 saved look uses the selected item. It will be updated automatically."
+                                "1 saved fit uses the selected item. It will be updated automatically."
                             } else {
-                                "$affectedOutfitCount saved looks use the selected items. They will be updated automatically."
+                                "$affectedOutfitCount saved fits use the selected items. They will be updated automatically."
                             }
                         )
-                        append(" The saved looks themselves will not be deleted.")
+                        append(" The saved fits themselves will not be deleted.")
                     }
                 }
             )

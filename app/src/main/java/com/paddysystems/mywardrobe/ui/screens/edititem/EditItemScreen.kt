@@ -117,7 +117,7 @@ fun EditItemScreen(
         EditorialPageHeader(
             eyebrow = "Wardrobe piece",
             title = "Edit details",
-            subtitle = "Keep the information that makes outfit suggestions useful.",
+            subtitle = "Keep the information that makes fit suggestions useful.",
             navigationIcon = Icons.Outlined.ArrowBack,
             onNavigate = onBack
         )

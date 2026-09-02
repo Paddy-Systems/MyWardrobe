@@ -53,12 +53,12 @@ fun OutfitsScreen(
             .padding(top = 22.dp)
     ) {
         EditorialPageHeader(
-            eyebrow = "Your lookbook",
-            title = "Saved outfits",
+            eyebrow = "Your style archive",
+            title = "Saved fits",
             subtitle = if (outfits.isEmpty()) {
                 "A home for combinations worth repeating."
             } else {
-                "${outfits.size} looks, ready when you are."
+                "${outfits.size} ${if (outfits.size == 1) "fit" else "fits"}, ready when you are."
             },
             modifier = Modifier.padding(horizontal = 20.dp)
         )
@@ -66,7 +66,7 @@ fun OutfitsScreen(
         Spacer(Modifier.height(16.dp))
 
         EditorialPrimaryButton(
-            text = "Build a new look",
+            text = "Build a new fit",
             icon = Icons.Outlined.Add,
             onClick = onCreateOutfit,
             modifier = Modifier
@@ -84,7 +84,7 @@ fun OutfitsScreen(
             ) {
                 Column(Modifier.padding(24.dp)) {
                     Text(
-                        "Your first look starts here",
+                        "Your first fit starts here",
                         style = MaterialTheme.typography.titleLarge
                     )
                     Text(

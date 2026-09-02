@@ -2,7 +2,7 @@
 <full-backup-content>
     <!--
         Large wardrobe data is intentionally excluded from Android Auto Backup.
-        Use MyWardrobe's versioned .mwbackup export for reliable portable backups.
+        Use Wearfolio's versioned .mwbackup export for reliable portable backups.
     -->
     <exclude domain="file" path="profiles/" />
     <exclude domain="file" path="profiles.json" />

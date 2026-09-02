@@ -22,12 +22,12 @@ fun RenameOutfitDialog(
 
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Rename outfit") },
+        title = { Text("Rename fit") },
         text = {
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Outfit name") },
+                label = { Text("Fit name") },
                 singleLine = true
             )
         },
