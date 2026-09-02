@@ -14,6 +14,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Check
+import androidx.compose.material.icons.outlined.SettingsBackupRestore
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -38,83 +39,206 @@ import com.paddysystems.mywardrobe.ui.screens.onboarding.WardrobeNameForm
 fun ManageProfilesScreen(
     onBack: () -> Unit,
     onProfileSwitched: (Profile) -> Unit,
+    onDataManagement: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
     val activeProfile = LocalActiveProfile.current
 
-    var profiles by remember { mutableStateOf(ProfileStorage.loadProfiles(context)) }
-    var showAddWardrobe by remember { mutableStateOf(false) }
-    var newWardrobeName by remember { mutableStateOf("") }
+    var profiles by remember {
+        mutableStateOf(
+            ProfileStorage.loadProfiles(
+                context
+            )
+        )
+    }
+
+    var showAddWardrobe by remember {
+        mutableStateOf(false)
+    }
+
+    var newWardrobeName by remember {
+        mutableStateOf("")
+    }
 
     Column(
-        modifier = modifier
-            .fillMaxSize()
-            .background(MaterialTheme.colorScheme.background)
-            .padding(horizontal = 20.dp, vertical = 22.dp)
+        modifier =
+            modifier
+                .fillMaxSize()
+                .background(
+                    MaterialTheme
+                        .colorScheme
+                        .background
+                )
+                .padding(
+                    horizontal = 20.dp,
+                    vertical = 22.dp
+                )
     ) {
         EditorialPageHeader(
-            eyebrow = "Wardrobes",
-            title = "Your wardrobes",
-            navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
-            onNavigate = onBack
+            eyebrow =
+                "Wardrobes",
+            title =
+                "Your wardrobes",
+            subtitle =
+                "Switch collections, add another wardrobe, or keep every wardrobe backed up.",
+            navigationIcon =
+                Icons.AutoMirrored
+                    .Outlined
+                    .ArrowBack,
+            onNavigate =
+                onBack
         )
 
-        Spacer(Modifier.height(20.dp))
+        Spacer(
+            Modifier.height(
+                20.dp
+            )
+        )
 
-        profiles.forEach { profile ->
-            val isActive = profile.id == activeProfile.id
+        profiles
+            .forEach { profile ->
+                val isActive =
+                    profile.id ==
+                        activeProfile.id
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(14.dp))
-                    .clickable(enabled = !isActive) {
-                        if (ProfileStorage.setActiveProfile(context, profile.id)) {
-                            onProfileSwitched(profile)
-                        }
-                    }
-                    .padding(vertical = 14.dp, horizontal = 12.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "${profile.name}'s Wardrobe",
-                    style = MaterialTheme.typography.bodyLarge,
-                    color = MaterialTheme.colorScheme.onBackground
-                )
-
-                if (isActive) {
-                    Icon(
-                        imageVector = Icons.Outlined.Check,
-                        contentDescription = "Currently active",
-                        tint = MaterialTheme.colorScheme.primary
+                Row(
+                    modifier =
+                        Modifier
+                            .fillMaxWidth()
+                            .clip(
+                                RoundedCornerShape(
+                                    14.dp
+                                )
+                            )
+                            .clickable(
+                                enabled =
+                                    !isActive
+                            ) {
+                                if (
+                                    ProfileStorage
+                                        .setActiveProfile(
+                                            context,
+                                            profile.id
+                                        )
+                                ) {
+                                    onProfileSwitched(
+                                        profile
+                                    )
+                                }
+                            }
+                            .padding(
+                                vertical = 14.dp,
+                                horizontal = 12.dp
+                            ),
+                    horizontalArrangement =
+                        Arrangement
+                            .SpaceBetween,
+                    verticalAlignment =
+                        Alignment
+                            .CenterVertically
+                ) {
+                    Text(
+                        text =
+                            "${profile.name}'s Wardrobe",
+                        style =
+                            MaterialTheme
+                                .typography
+                                .bodyLarge,
+                        color =
+                            MaterialTheme
+                                .colorScheme
+                                .onBackground
                     )
+
+                    if (
+                        isActive
+                    ) {
+                        Icon(
+                            imageVector =
+                                Icons.Outlined
+                                    .Check,
+                            contentDescription =
+                                "Currently active",
+                            tint =
+                                MaterialTheme
+                                    .colorScheme
+                                    .primary
+                        )
+                    }
                 }
             }
-        }
 
-        Spacer(Modifier.height(12.dp))
+        Spacer(
+            Modifier.height(
+                12.dp
+            )
+        )
 
-        if (showAddWardrobe) {
+        if (
+            showAddWardrobe
+        ) {
             WardrobeNameForm(
-                name = newWardrobeName,
-                onNameChange = { newWardrobeName = it },
-                submitLabel = "Add wardrobe",
+                name =
+                    newWardrobeName,
+                onNameChange = {
+                    newWardrobeName =
+                        it
+                },
+                submitLabel =
+                    "Add wardrobe",
                 onSubmit = {
-                    val profile = ProfileStorage.createProfile(context, newWardrobeName.trim())
-                    profiles = ProfileStorage.loadProfiles(context)
+                    val profile =
+                        ProfileStorage
+                            .createProfile(
+                                context,
+                                newWardrobeName
+                                    .trim()
+                            )
+
+                    profiles =
+                        ProfileStorage
+                            .loadProfiles(
+                                context
+                            )
+
                     newWardrobeName = ""
                     showAddWardrobe = false
-                    onProfileSwitched(profile)
+
+                    onProfileSwitched(
+                        profile
+                    )
                 }
             )
         } else {
             EditorialSecondaryButton(
-                text = "Add another wardrobe",
-                onClick = { showAddWardrobe = true },
-                modifier = Modifier.fillMaxWidth()
+                text =
+                    "Add another wardrobe",
+                onClick = {
+                    showAddWardrobe =
+                        true
+                },
+                modifier =
+                    Modifier.fillMaxWidth()
             )
         }
+
+        Spacer(
+            Modifier.height(
+                12.dp
+            )
+        )
+
+        EditorialSecondaryButton(
+            text =
+                "Backup & restore",
+            icon =
+                Icons.Outlined
+                    .SettingsBackupRestore,
+            onClick =
+                onDataManagement,
+            modifier =
+                Modifier.fillMaxWidth()
+        )
     }
 }
