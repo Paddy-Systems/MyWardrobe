@@ -1,0 +1,139 @@
+name: One-shot Wearfolio rename
+
+on:
+  push:
+    branches:
+      - automation/wearfolio-rename
+
+permissions:
+  contents: write
+
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Check out fresh main
+        uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Verify expected main
+        shell: bash
+        run: |
+          set -euo pipefail
+          EXPECTED="a397d2f2e61c7d17c6b13ada24b3a1a801c47b4b"
+          ACTUAL="$(git rev-parse HEAD)"
+          if [ "$ACTUAL" != "$EXPECTED" ]; then
+            echo "main moved: expected $EXPECTED, got $ACTUAL"
+            exit 1
+          fi
+
+      - name: Rename Kotlin package directories
+        shell: bash
+        run: |
+          set -euo pipefail
+          git mv app/src/main/java/com/paddysystems/mywardrobe app/src/main/java/com/paddysystems/wearfolio
+          git mv app/src/androidTest/java/com/paddysystems/mywardrobe app/src/androidTest/java/com/paddysystems/wearfolio
+          git mv app/src/test/java/com/paddysystems/mywardrobe app/src/test/java/com/paddysystems/wearfolio
+
+      - name: Rename branded Kotlin files
+        shell: bash
+        run: |
+          set -euo pipefail
+          git mv app/src/main/java/com/paddysystems/wearfolio/ui/MyWardrobeApp.kt app/src/main/java/com/paddysystems/wearfolio/ui/WearfolioApp.kt
+          git mv app/src/main/java/com/paddysystems/wearfolio/ui/navigation/MyWardrobeBottomBar.kt app/src/main/java/com/paddysystems/wearfolio/ui/navigation/WearfolioBottomBar.kt
+          git mv app/src/main/java/com/paddysystems/wearfolio/ui/navigation/MyWardrobeNavigation.kt app/src/main/java/com/paddysystems/wearfolio/ui/navigation/WearfolioNavigation.kt
+
+      - name: Replace old brand references
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+
+          root = Path('.')
+          replacements = [
+              ('com.paddysystems.mywardrobe', 'com.paddysystems.wearfolio'),
+              ('My Wardrobe', 'Wearfolio'),
+              ('my wardrobe', 'Wearfolio'),
+              ('MY WARDROBE', 'WEARFOLIO'),
+              ('MyWardrobe', 'Wearfolio'),
+              ('mywardrobe', 'wearfolio'),
+              ('MYWARDROBE', 'WEARFOLIO'),
+              ('my_wardrobe', 'wearfolio'),
+              ('MY_WARDROBE', 'WEARFOLIO'),
+              ('my-wardrobe', 'wearfolio'),
+              ('My-Wardrobe', 'Wearfolio'),
+              ('.mwbackup', '.wearfolio'),
+              ('mwbackup', 'wearfolio'),
+              ('MWBACKUP', 'WEARFOLIO'),
+          ]
+
+          for path in root.rglob('*'):
+              if not path.is_file() or '.git' in path.parts:
+                  continue
+              try:
+                  text = path.read_text(encoding='utf-8')
+              except (UnicodeDecodeError, OSError):
+                  continue
+
+              updated = text
+              for old, new in replacements:
+                  updated = updated.replace(old, new)
+
+              if updated != text:
+                  path.write_text(updated, encoding='utf-8')
+          PY
+
+      - name: Validate old name is gone
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          if git grep -n -i -E 'my[ _-]?wardrobe|mywardrobe|mwbackup'; then
+            echo "Old MyWardrobe branding still exists in tracked text files."
+            exit 1
+          fi
+
+          OLD_PATHS="$(find . -path './.git' -prune -o \( -iname '*mywardrobe*' -o -iname '*my-wardrobe*' -o -iname '*my_wardrobe*' \) -print)"
+          if [ -n "$OLD_PATHS" ]; then
+            echo "Old MyWardrobe branding still exists in paths:"
+            echo "$OLD_PATHS"
+            exit 1
+          fi
+
+          test ! -d app/src/main/java/com/paddysystems/mywardrobe
+          test ! -d app/src/androidTest/java/com/paddysystems/mywardrobe
+          test ! -d app/src/test/java/com/paddysystems/mywardrobe
+
+          test -d app/src/main/java/com/paddysystems/wearfolio
+          test -d app/src/androidTest/java/com/paddysystems/wearfolio
+          test -d app/src/test/java/com/paddysystems/wearfolio
+
+      - name: Check diff
+        shell: bash
+        run: |
+          set -euo pipefail
+          git diff --check
+          git status --short
+
+      - name: Build and test
+        shell: bash
+        run: |
+          set -euo pipefail
+          chmod +x gradlew
+          ./gradlew testDebugUnitTest assembleDebug --stacktrace
+
+      - name: Commit directly to main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "Patrick Kenneally"
+          git config user.email "36610246+ptekspy@users.noreply.github.com"
+          git add -A
+          git diff --cached --stat
+          git commit -m "Rename MyWardrobe internals to Wearfolio"
+          git push origin HEAD:main
