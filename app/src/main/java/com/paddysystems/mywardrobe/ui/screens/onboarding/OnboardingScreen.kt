@@ -21,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import com.paddysystems.mywardrobe.data.model.Profile
 import com.paddysystems.mywardrobe.data.storage.ProfileStorage
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
+import com.paddysystems.mywardrobe.ui.components.WearfolioLockup
 
 @Composable
 fun OnboardingScreen(
@@ -37,8 +38,12 @@ fun OnboardingScreen(
             .windowInsetsPadding(WindowInsets.safeDrawing)
             .padding(horizontal = 20.dp, vertical = 22.dp)
     ) {
+        WearfolioLockup()
+
+        Spacer(Modifier.height(32.dp))
+
         EditorialPageHeader(
-            eyebrow = "Welcome",
+            eyebrow = "Your wardrobe, considered",
             title = "Whose wardrobe is this?",
             subtitle = "Give it a name so you can tell your wardrobes apart later."
         )

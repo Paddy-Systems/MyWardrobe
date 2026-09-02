@@ -28,7 +28,7 @@ fun ItemOutfitUsageSection(
 ) {
     Column(modifier = modifier) {
         Text(
-            text = "SAVED LOOKS",
+            text = "SAVED FITS",
             style = MaterialTheme.typography.labelSmall,
             color = MaterialTheme.colorScheme.primary
         )
@@ -37,7 +37,7 @@ fun ItemOutfitUsageSection(
 
         if (outfits.isEmpty()) {
             Text(
-                text = "Not used in a saved look yet.",
+                text = "Not used in a saved fit yet.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )

@@ -18,7 +18,7 @@ fun SaveOutfitDialog(
     suggestedName: String,
     onSave: (String) -> Unit,
     onDismiss: () -> Unit,
-    title: String = "Name this look",
+    title: String = "Name this fit",
     confirmText: String = "Save"
 ) {
     var name by remember(suggestedName) {
@@ -37,7 +37,7 @@ fun SaveOutfitDialog(
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },
-                label = { Text("Outfit name") },
+                label = { Text("Fit name") },
                 singleLine = true
             )
         },

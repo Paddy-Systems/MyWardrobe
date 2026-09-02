@@ -54,7 +54,7 @@ fun MyWardrobeBottomBar(
             selected = selectedDestination == MyWardrobeDestination.OUTFITS,
             onClick = onViewOutfits,
             icon = { Icon(Icons.Outlined.Style, contentDescription = null) },
-            label = { Text("Outfits", style = MaterialTheme.typography.labelSmall) },
+            label = { Text("Fits", style = MaterialTheme.typography.labelSmall) },
             colors = colors
         )
     }

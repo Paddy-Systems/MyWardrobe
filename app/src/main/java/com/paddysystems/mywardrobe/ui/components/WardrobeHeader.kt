@@ -20,7 +20,7 @@ fun WardrobeHeader(
         "$itemCount of $totalItemCount ${itemWord(totalItemCount)} shown"
     }
     EditorialPageHeader(
-        eyebrow = if (selectedCount > 0) "Editing wardrobe" else "Your collection",
+        eyebrow = if (selectedCount > 0) "Editing wardrobe" else "Wearfolio · Your collection",
         title = if (selectedCount > 0) "$selectedCount selected" else "$profileName's Wardrobe",
         subtitle = if (selectedCount > 0) "Choose what to do with these pieces" else subtitle,
         actionIcon = if (selectedCount > 0) null else Icons.Outlined.Groups,

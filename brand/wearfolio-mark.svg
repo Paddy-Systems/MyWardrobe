@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title description">
+  <title id="title">Wearfolio mark</title>
+  <desc id="description">A layered W formed from aubergine, dusty rose and stone ribbons.</desc>
+  <rect width="512" height="512" rx="112" fill="#F6F0E8"/>
+  <path d="M124 142 200 350" fill="none" stroke="#35152F" stroke-linecap="round" stroke-linejoin="round" stroke-width="62"/>
+  <path d="m200 350 56-152 56 152" fill="none" stroke="#B9827E" stroke-linecap="round" stroke-linejoin="round" stroke-width="62"/>
+  <path d="m312 350 76-208" fill="none" stroke="#C9BDB2" stroke-linecap="round" stroke-linejoin="round" stroke-width="62"/>
+</svg>

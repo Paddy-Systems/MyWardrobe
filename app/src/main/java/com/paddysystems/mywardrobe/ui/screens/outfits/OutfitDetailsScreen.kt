@@ -82,9 +82,9 @@ fun OutfitDetailsScreen(
                 .padding(20.dp)
         ) {
             EditorialPageHeader(
-                eyebrow = "Saved look",
-                title = "Outfit unavailable",
-                subtitle = "This saved outfit could not be loaded.",
+                eyebrow = "Saved fit",
+                title = "Fit unavailable",
+                subtitle = "This saved fit could not be loaded.",
                 navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
                 onNavigate = onBack
             )
@@ -100,7 +100,7 @@ fun OutfitDetailsScreen(
             .padding(top = 22.dp, bottom = 28.dp)
     ) {
         EditorialPageHeader(
-            eyebrow = "Saved look",
+            eyebrow = "Saved fit",
             title = current.name,
             subtitle = "${current.layers.size} ${if (current.layers.size == 1) "layer" else "layers"}",
             navigationIcon = Icons.AutoMirrored.Outlined.ArrowBack,
@@ -120,7 +120,7 @@ fun OutfitDetailsScreen(
                 modifier = Modifier.padding(horizontal = 20.dp)
             )
             Text(
-                text = "This look only contains finishing pieces.",
+                text = "This fit only contains finishing pieces.",
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)
@@ -222,7 +222,7 @@ fun OutfitDetailsScreen(
         Spacer(Modifier.height(30.dp))
 
         EditorialSecondaryButton(
-            text = "Rename look",
+            text = "Rename fit",
             icon = Icons.Outlined.Edit,
             enabled = !isWorking,
             onClick = { showRenameDialog = true },
@@ -234,7 +234,7 @@ fun OutfitDetailsScreen(
         Spacer(Modifier.height(10.dp))
 
         EditorialDangerButton(
-            text = "Delete outfit",
+            text = "Delete fit",
             icon = Icons.Outlined.DeleteOutline,
             enabled = !isWorking,
             onClick = { showDeleteDialog = true },
@@ -277,7 +277,7 @@ fun OutfitDetailsScreen(
                         outfit = updated
                         onChanged()
                     } else {
-                        actionError = "Could not rename outfit."
+                        actionError = "Could not rename fit."
                     }
                 }
             }
@@ -306,7 +306,7 @@ fun OutfitDetailsScreen(
                     if (deleted) {
                         onDeleted()
                     } else {
-                        actionError = "Could not delete outfit."
+                        actionError = "Could not delete fit."
                     }
                 }
             }

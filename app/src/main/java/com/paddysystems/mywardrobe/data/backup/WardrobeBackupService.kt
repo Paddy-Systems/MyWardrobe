@@ -59,7 +59,7 @@ object WardrobeBackupService {
 
     fun suggestedFileName(): String {
         val date = SimpleDateFormat("yyyy-MM-dd", Locale.UK).format(Date())
-        return "MyWardrobe-$date.mwbackup"
+        return "Wearfolio-$date.mwbackup"
     }
 
     fun exportBackup(
