@@ -20,6 +20,12 @@ fun saveOutfit(
 
     return try {
         file.writeText(outfitToJson(outfit).toString())
+
+        // outfitIds is cached relationship metadata. The outfit file is
+        // still considered successfully saved if this repair pass fails.
+        runCatching {
+            syncWardrobeOutfitIds(context)
+        }
         true
     } catch (exception: Exception) {
         false
@@ -80,7 +86,15 @@ fun deleteOutfit(
     outfitId: String
 ): Boolean {
     val file = File(context.filesDir, "outfits/$outfitId.json")
-    return !file.exists() || file.delete()
+    val deleted = !file.exists() || file.delete()
+
+    if (deleted) {
+        runCatching {
+            syncWardrobeOutfitIds(context)
+        }
+    }
+
+    return deleted
 }
 
 private fun outfitToJson(outfit: Outfit): JSONObject {

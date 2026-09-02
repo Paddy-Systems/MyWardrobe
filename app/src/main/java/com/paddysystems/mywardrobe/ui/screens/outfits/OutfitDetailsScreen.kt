@@ -49,6 +49,7 @@ fun OutfitDetailsScreen(
     refreshKey: Int = 0,
     onBack: () -> Unit,
     onEdit: () -> Unit,
+    onItemClick: (String) -> Unit = {},
     onChanged: () -> Unit,
     onDeleted: () -> Unit
 ) {
@@ -177,6 +178,7 @@ fun OutfitDetailsScreen(
                     layer = current.layers[safeIndex],
                     layerNumber = safeIndex + 1,
                     wardrobeItems = wardrobeItems,
+                    onItemClick = onItemClick,
                     modifier = Modifier.padding(horizontal = 20.dp)
                 )
 
@@ -211,6 +213,7 @@ fun OutfitDetailsScreen(
         OutfitFinishingPieces(
             outfit = current,
             wardrobeItems = wardrobeItems,
+            onItemClick = onItemClick,
             modifier = Modifier.padding(horizontal = 20.dp)
         )
 

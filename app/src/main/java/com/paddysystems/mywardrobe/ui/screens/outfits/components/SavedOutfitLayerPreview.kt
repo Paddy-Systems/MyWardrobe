@@ -1,5 +1,6 @@
 package com.paddysystems.mywardrobe.ui.screens.outfits.components
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -23,6 +24,7 @@ fun SavedOutfitLayerPreview(
     layer: OutfitLayer,
     layerNumber: Int,
     wardrobeItems: List<WardrobeItem>,
+    onItemClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val itemsById = remember(wardrobeItems) {
@@ -77,6 +79,7 @@ fun SavedOutfitLayerPreview(
                                 .padding(top = 30.dp)
                                 .fillMaxWidth(0.78f)
                                 .height(200.dp)
+                                .clickable { onItemClick(item.id) }
                         )
                     }
 
@@ -88,6 +91,7 @@ fun SavedOutfitLayerPreview(
                                 .padding(bottom = 12.dp)
                                 .fillMaxWidth(0.72f)
                                 .height(250.dp)
+                                .clickable { onItemClick(item.id) }
                         )
                     }
                 }
@@ -104,6 +108,7 @@ fun SavedOutfitLayerPreview(
                                     end = 24.dp,
                                     bottom = 12.dp
                                 )
+                                .clickable { onItemClick(item.id) }
                         )
                     }
                 }

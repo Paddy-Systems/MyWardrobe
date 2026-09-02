@@ -46,6 +46,10 @@ fun MyWardrobeNavigation(
         mutableIntStateOf(0)
     }
 
+    var wardrobeRefreshKey by remember {
+        mutableIntStateOf(0)
+    }
+
     val backStackEntry by navController.currentBackStackEntryAsState()
     val currentRoute = backStackEntry?.destination?.route
 
@@ -87,6 +91,11 @@ fun MyWardrobeNavigation(
         ) {
             composable(Routes.WARDROBE) {
                 WardrobeScreen(
+                    refreshKey = wardrobeRefreshKey,
+                    onWardrobeChanged = {
+                        wardrobeRefreshKey++
+                        outfitsRefreshKey++
+                    },
                     onItemClick = { item ->
                         navController.navigate(Routes.itemDetails(item.id))
                     }
@@ -97,6 +106,7 @@ fun MyWardrobeNavigation(
                 CreateOutfitScreen(
                     onSaved = {
                         outfitsRefreshKey++
+                        wardrobeRefreshKey++
                         navController.navigate(Routes.OUTFITS) {
                             popUpTo(Routes.CREATE_OUTFIT) {
                                 inclusive = true
@@ -133,11 +143,16 @@ fun MyWardrobeNavigation(
                     onEdit = {
                         navController.navigate(Routes.editOutfit(outfitId))
                     },
+                    onItemClick = { itemId ->
+                        navController.navigate(Routes.itemDetails(itemId))
+                    },
                     onChanged = {
                         outfitsRefreshKey++
+                        wardrobeRefreshKey++
                     },
                     onDeleted = {
                         outfitsRefreshKey++
+                        wardrobeRefreshKey++
                         navController.popBackStack()
                     }
                 )
@@ -155,6 +170,7 @@ fun MyWardrobeNavigation(
                     },
                     onSaved = {
                         outfitsRefreshKey++
+                        wardrobeRefreshKey++
                         navController.popBackStack()
                     }
                 )
@@ -163,6 +179,9 @@ fun MyWardrobeNavigation(
             composable(Routes.ADD_ITEM) {
                 AddItemScreen(
                     onBack = {
+                        // Successful Add Item currently exits through this callback,
+                        // so refreshing here makes the new item visible immediately.
+                        wardrobeRefreshKey++
                         navController.popBackStack()
                     }
                 )
@@ -175,8 +194,12 @@ fun MyWardrobeNavigation(
 
                 ItemDetailsScreen(
                     itemId = itemId,
+                    refreshKey = wardrobeRefreshKey,
                     onEdit = {
                         navController.navigate(Routes.editItem(itemId))
+                    },
+                    onOutfitClick = { outfitId ->
+                        navController.navigate(Routes.outfitDetails(outfitId))
                     },
                     onBack = {
                         navController.popBackStack()
@@ -193,6 +216,19 @@ fun MyWardrobeNavigation(
                     itemId = itemId,
                     onBack = {
                         navController.popBackStack()
+                    },
+                    onSaved = {
+                        wardrobeRefreshKey++
+                        outfitsRefreshKey++
+                        navController.popBackStack()
+                    },
+                    onDeleted = {
+                        wardrobeRefreshKey++
+                        outfitsRefreshKey++
+                        navController.popBackStack(
+                            route = Routes.WARDROBE,
+                            inclusive = false
+                        )
                     }
                 )
             }

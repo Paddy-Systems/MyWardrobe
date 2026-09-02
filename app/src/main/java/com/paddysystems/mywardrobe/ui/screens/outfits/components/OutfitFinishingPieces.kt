@@ -32,6 +32,7 @@ private data class FinishingPiece(
 fun OutfitFinishingPieces(
     outfit: Outfit,
     wardrobeItems: List<WardrobeItem>,
+    onItemClick: (String) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val itemsById = remember(wardrobeItems) {
@@ -82,6 +83,9 @@ fun OutfitFinishingPieces(
             items(pieces) { piece ->
                 Column(modifier = Modifier.width(118.dp)) {
                     Surface(
+                        onClick = {
+                            onItemClick(piece.item.id)
+                        },
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(110.dp),
