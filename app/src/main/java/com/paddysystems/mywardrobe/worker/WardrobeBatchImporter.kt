@@ -11,6 +11,7 @@ object WardrobeBatchImporter {
 
     fun enqueue(
         context: Context,
+        profileId: String,
         importIds: List<String>
     ) {
         if (importIds.isEmpty()) {
@@ -21,7 +22,8 @@ object WardrobeBatchImporter {
             OneTimeWorkRequestBuilder<WardrobeImportWorker>()
                 .setInputData(
                     workDataOf(
-                        WardrobeImportWorker.KEY_IMPORT_ID to importId
+                        WardrobeImportWorker.KEY_IMPORT_ID to importId,
+                        WardrobeImportWorker.KEY_PROFILE_ID to profileId
                     )
                 )
                 .addTag("wardrobe-import-$importId")
@@ -45,8 +47,9 @@ object WardrobeBatchImporter {
 
     fun retry(
         context: Context,
+        profileId: String,
         importId: String
     ) {
-        enqueue(context, listOf(importId))
+        enqueue(context, profileId, listOf(importId))
     }
 }

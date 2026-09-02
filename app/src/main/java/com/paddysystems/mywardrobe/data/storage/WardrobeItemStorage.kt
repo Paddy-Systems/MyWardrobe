@@ -14,16 +14,18 @@ import java.io.File
 
 fun saveWardrobeItem(
     context: Context,
+    profileId: String,
     imageUri: Uri,
     clothingTypeId: String,
     colours: List<String>,
     imageEmbedding: FloatArray,
     metadata: WardrobeMetadata
 ): WardrobeItem? {
-    val imageFile = saveImage(context, imageUri) ?: return null
+    val imageFile = saveImage(context, profileId, imageUri) ?: return null
 
     val item = saveWardrobeItemFromImageFile(
         context = context,
+        profileId = profileId,
         imageFile = imageFile,
         clothingTypeId = clothingTypeId,
         colours = colours,
@@ -40,6 +42,7 @@ fun saveWardrobeItem(
 
 fun saveWardrobeItemFromImageFile(
     context: Context,
+    profileId: String,
     imageFile: File,
     clothingTypeId: String,
     colours: List<String>,
@@ -63,24 +66,28 @@ fun saveWardrobeItemFromImageFile(
     return try {
         saveWardrobeItemEmbedding(
             context = context,
+            profileId = profileId,
             itemId = item.id,
             embedding = imageEmbedding
         )
 
-        if (!writeWardrobeItem(context, item)) {
-            getEmbeddingFile(context, item.id).delete()
+        if (!writeWardrobeItem(context, profileId, item)) {
+            getEmbeddingFile(context, profileId, item.id).delete()
             null
         } else {
             item
         }
     } catch (exception: Exception) {
-        getEmbeddingFile(context, item.id).delete()
+        getEmbeddingFile(context, profileId, item.id).delete()
         null
     }
 }
 
-fun loadWardrobeItems(context: Context): List<WardrobeItem> {
-    val itemDirectory = File(context.filesDir, "wardrobe_items")
+fun loadWardrobeItems(
+    context: Context,
+    profileId: String
+): List<WardrobeItem> {
+    val itemDirectory = File(ProfileStorage.profileDirectory(context, profileId), "wardrobe_items")
 
     if (!itemDirectory.exists()) {
         return emptyList()
@@ -107,10 +114,12 @@ fun loadWardrobeItems(context: Context): List<WardrobeItem> {
 
 fun deleteWardrobeItem(
     context: Context,
+    profileId: String,
     item: WardrobeItem
 ): Boolean {
     val outfitsCleaned = removeWardrobeItemFromOutfits(
         context = context,
+        profileId = profileId,
         itemId = item.id
     )
 
@@ -119,8 +128,8 @@ fun deleteWardrobeItem(
     }
 
     val imageFile = File(item.imagePath)
-    val itemFile = File(context.filesDir, "wardrobe_items/${item.id}.json")
-    val embeddingFile = getEmbeddingFile(context, item.id)
+    val itemFile = File(ProfileStorage.profileDirectory(context, profileId), "wardrobe_items/${item.id}.json")
+    val embeddingFile = getEmbeddingFile(context, profileId, item.id)
 
     val imageDeleted = !imageFile.exists() || imageFile.delete()
     val metadataDeleted = !itemFile.exists() || itemFile.delete()
@@ -137,9 +146,10 @@ fun deleteWardrobeItem(
 
 fun loadWardrobeItem(
     context: Context,
+    profileId: String,
     itemId: String
 ): WardrobeItem? {
-    val itemFile = File(context.filesDir, "wardrobe_items/$itemId.json")
+    val itemFile = File(ProfileStorage.profileDirectory(context, profileId), "wardrobe_items/$itemId.json")
 
     if (!itemFile.exists()) {
         return null
@@ -159,6 +169,7 @@ fun loadWardrobeItem(
 
 fun updateWardrobeItem(
     context: Context,
+    profileId: String,
     item: WardrobeItem,
     clothingTypeId: String,
     colours: List<String>
@@ -168,11 +179,12 @@ fun updateWardrobeItem(
         colours = colours
     )
 
-    return writeWardrobeItem(context, updatedItem)
+    return writeWardrobeItem(context, profileId, updatedItem)
 }
 
 fun updateWardrobeItemOutfitIds(
     context: Context,
+    profileId: String,
     item: WardrobeItem,
     outfitIds: List<String>
 ): Boolean {
@@ -180,17 +192,18 @@ fun updateWardrobeItemOutfitIds(
         outfitIds = outfitIds.distinct()
     )
 
-    return writeWardrobeItem(context, updatedItem)
+    return writeWardrobeItem(context, profileId, updatedItem)
 }
 
 fun updateWardrobeItemCutout(
     context: Context,
+    profileId: String,
     item: WardrobeItem,
     cutoutPath: String
 ): WardrobeItem? {
     val updatedItem = item.copy(cutoutPath = cutoutPath)
 
-    return if (writeWardrobeItem(context, updatedItem)) {
+    return if (writeWardrobeItem(context, profileId, updatedItem)) {
         updatedItem
     } else {
         null
@@ -199,9 +212,10 @@ fun updateWardrobeItemCutout(
 
 private fun writeWardrobeItem(
     context: Context,
+    profileId: String,
     item: WardrobeItem
 ): Boolean {
-    val itemDirectory = File(context.filesDir, "wardrobe_items")
+    val itemDirectory = File(ProfileStorage.profileDirectory(context, profileId), "wardrobe_items")
     itemDirectory.mkdirs()
 
     val itemFile = File(itemDirectory, "${item.id}.json")
@@ -319,19 +333,21 @@ private fun wardrobeItemToJson(item: WardrobeItem): JSONObject {
 
 private fun getEmbeddingFile(
     context: Context,
+    profileId: String,
     itemId: String
 ): File {
-    val directory = File(context.filesDir, "wardrobe_embeddings")
+    val directory = File(ProfileStorage.profileDirectory(context, profileId), "wardrobe_embeddings")
     directory.mkdirs()
     return File(directory, "$itemId.bin")
 }
 
 private fun saveWardrobeItemEmbedding(
     context: Context,
+    profileId: String,
     itemId: String,
     embedding: FloatArray
 ) {
-    val file = getEmbeddingFile(context, itemId)
+    val file = getEmbeddingFile(context, profileId, itemId)
 
     DataOutputStream(file.outputStream().buffered()).use { output ->
         embedding.forEach { value ->
@@ -342,9 +358,10 @@ private fun saveWardrobeItemEmbedding(
 
 fun loadWardrobeItemEmbedding(
     context: Context,
+    profileId: String,
     itemId: String
 ): FloatArray? {
-    val file = getEmbeddingFile(context, itemId)
+    val file = getEmbeddingFile(context, profileId, itemId)
 
     if (!file.exists() || file.length() == 0L || file.length() % 4L != 0L) {
         return null

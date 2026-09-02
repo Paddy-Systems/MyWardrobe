@@ -11,9 +11,10 @@ import java.io.File
 
 fun saveOutfit(
     context: Context,
+    profileId: String,
     outfit: Outfit
 ): Boolean {
-    val directory = File(context.filesDir, "outfits")
+    val directory = File(ProfileStorage.profileDirectory(context, profileId), "outfits")
     directory.mkdirs()
 
     val file = File(directory, "${outfit.id}.json")
@@ -24,7 +25,7 @@ fun saveOutfit(
         // outfitIds is cached relationship metadata. The outfit file is
         // still considered successfully saved if this repair pass fails.
         runCatching {
-            syncWardrobeOutfitIds(context)
+            syncWardrobeOutfitIds(context, profileId)
         }
         true
     } catch (exception: Exception) {
@@ -32,8 +33,11 @@ fun saveOutfit(
     }
 }
 
-fun loadOutfits(context: Context): List<Outfit> {
-    val directory = File(context.filesDir, "outfits")
+fun loadOutfits(
+    context: Context,
+    profileId: String
+): List<Outfit> {
+    val directory = File(ProfileStorage.profileDirectory(context, profileId), "outfits")
 
     if (!directory.exists()) {
         return emptyList()
@@ -55,9 +59,10 @@ fun loadOutfits(context: Context): List<Outfit> {
 
 fun loadOutfit(
     context: Context,
+    profileId: String,
     outfitId: String
 ): Outfit? {
-    val file = File(context.filesDir, "outfits/$outfitId.json")
+    val file = File(ProfileStorage.profileDirectory(context, profileId), "outfits/$outfitId.json")
 
     if (!file.exists()) {
         return null
@@ -72,25 +77,27 @@ fun loadOutfit(
 
 fun renameOutfit(
     context: Context,
+    profileId: String,
     outfitId: String,
     name: String
 ): Outfit? {
-    val existing = loadOutfit(context, outfitId) ?: return null
+    val existing = loadOutfit(context, profileId, outfitId) ?: return null
     val updated = existing.copy(name = name.trim())
 
-    return if (saveOutfit(context, updated)) updated else null
+    return if (saveOutfit(context, profileId, updated)) updated else null
 }
 
 fun deleteOutfit(
     context: Context,
+    profileId: String,
     outfitId: String
 ): Boolean {
-    val file = File(context.filesDir, "outfits/$outfitId.json")
+    val file = File(ProfileStorage.profileDirectory(context, profileId), "outfits/$outfitId.json")
     val deleted = !file.exists() || file.delete()
 
     if (deleted) {
         runCatching {
-            syncWardrobeOutfitIds(context)
+            syncWardrobeOutfitIds(context, profileId)
         }
     }
 

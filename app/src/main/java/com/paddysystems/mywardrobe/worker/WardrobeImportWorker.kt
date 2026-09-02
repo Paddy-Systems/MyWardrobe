@@ -21,22 +21,27 @@ class WardrobeImportWorker(
         val importId = inputData.getString(KEY_IMPORT_ID)
             ?: return Result.success()
 
-        val existingItem = loadWardrobeItem(applicationContext, importId)
+        val profileId = inputData.getString(KEY_PROFILE_ID)
+            ?: return Result.success()
+
+        val existingItem = loadWardrobeItem(applicationContext, profileId, importId)
 
         if (existingItem != null) {
             runCatching {
                 WardrobeCutoutService.ensureCutout(
                     context = applicationContext,
+                    profileId = profileId,
                     item = existingItem
                 )
             }
 
-            WardrobeImportQueue.completeImport(applicationContext, importId)
+            WardrobeImportQueue.completeImport(applicationContext, profileId, importId)
             return Result.success()
         }
 
         val pendingImport = WardrobeImportQueue.findImport(
             context = applicationContext,
+            profileId = profileId,
             importId = importId
         ) ?: return Result.success()
 
@@ -45,13 +50,14 @@ class WardrobeImportWorker(
         if (!imageFile.exists()) {
             WardrobeImportQueue.markFailed(
                 context = applicationContext,
+                profileId = profileId,
                 importId = importId,
                 errorMessage = "The original photo is no longer available."
             )
             return Result.success()
         }
 
-        WardrobeImportQueue.markProcessing(applicationContext, importId)
+        WardrobeImportQueue.markProcessing(applicationContext, profileId, importId)
 
         return try {
             val analysis = WardrobeAnalysisService.analyse(
@@ -75,6 +81,7 @@ class WardrobeImportWorker(
 
             val item = saveWardrobeItemFromImageFile(
                 context = applicationContext,
+                profileId = profileId,
                 imageFile = imageFile,
                 clothingTypeId = clothingTypeId,
                 colours = colours,
@@ -87,17 +94,19 @@ class WardrobeImportWorker(
             runCatching {
                 WardrobeCutoutService.ensureCutout(
                     context = applicationContext,
+                    profileId = profileId,
                     item = item
                 )
             }
 
-            WardrobeImportQueue.completeImport(applicationContext, importId)
+            WardrobeImportQueue.completeImport(applicationContext, profileId, importId)
             Result.success()
         } catch (cancellation: CancellationException) {
             throw cancellation
         } catch (exception: Exception) {
             WardrobeImportQueue.markFailed(
                 context = applicationContext,
+                profileId = profileId,
                 importId = importId,
                 errorMessage = exception.message ?: "Could not analyse this photo."
             )
@@ -110,5 +119,6 @@ class WardrobeImportWorker(
 
     companion object {
         const val KEY_IMPORT_ID = "wardrobe_import_id"
+        const val KEY_PROFILE_ID = "wardrobe_import_profile_id"
     }
 }

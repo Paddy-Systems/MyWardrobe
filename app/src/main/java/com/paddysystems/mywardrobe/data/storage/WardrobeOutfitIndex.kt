@@ -8,15 +8,19 @@ import com.paddysystems.mywardrobe.data.model.withoutWardrobeItem
 
 fun loadOutfitsUsingItem(
     context: Context,
+    profileId: String,
     itemId: String
 ): List<Outfit> {
-    return loadOutfits(context)
+    return loadOutfits(context, profileId)
         .filter { it.containsItem(itemId) }
 }
 
-fun syncWardrobeOutfitIds(context: Context): Boolean {
-    val outfits = loadOutfits(context)
-    val wardrobeItems = loadWardrobeItems(context)
+fun syncWardrobeOutfitIds(
+    context: Context,
+    profileId: String
+): Boolean {
+    val outfits = loadOutfits(context, profileId)
+    val wardrobeItems = loadWardrobeItems(context, profileId)
     var success = true
 
     wardrobeItems.forEach { item ->
@@ -27,6 +31,7 @@ fun syncWardrobeOutfitIds(context: Context): Boolean {
         if (outfitIds != item.outfitIds) {
             val updated = updateWardrobeItemOutfitIds(
                 context = context,
+                profileId = profileId,
                 item = item,
                 outfitIds = outfitIds
             )
@@ -42,9 +47,10 @@ fun syncWardrobeOutfitIds(context: Context): Boolean {
 
 fun removeWardrobeItemFromOutfits(
     context: Context,
+    profileId: String,
     itemId: String
 ): Boolean {
-    val affectedOutfits = loadOutfits(context)
+    val affectedOutfits = loadOutfits(context, profileId)
         .filter { it.referencesItem(itemId) }
 
     var success = true
@@ -52,7 +58,7 @@ fun removeWardrobeItemFromOutfits(
     affectedOutfits.forEach { outfit ->
         val updated = outfit.withoutWardrobeItem(itemId)
 
-        if (!saveOutfit(context, updated)) {
+        if (!saveOutfit(context, profileId, updated)) {
             success = false
         }
     }

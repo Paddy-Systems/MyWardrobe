@@ -31,6 +31,7 @@ import com.paddysystems.mywardrobe.data.storage.deleteOutfit
 import com.paddysystems.mywardrobe.data.storage.loadOutfit
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
 import com.paddysystems.mywardrobe.data.storage.renameOutfit
+import com.paddysystems.mywardrobe.ui.LocalActiveProfile
 import com.paddysystems.mywardrobe.ui.components.EditorialDangerButton
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
 import com.paddysystems.mywardrobe.ui.components.EditorialSecondaryButton
@@ -54,14 +55,15 @@ fun OutfitDetailsScreen(
     onDeleted: () -> Unit
 ) {
     val context = LocalContext.current
+    val profileId = LocalActiveProfile.current.id
     val scope = rememberCoroutineScope()
 
-    var outfit by remember(outfitId, refreshKey) {
-        mutableStateOf(loadOutfit(context, outfitId))
+    var outfit by remember(outfitId, refreshKey, profileId) {
+        mutableStateOf(loadOutfit(context, profileId, outfitId))
     }
 
-    val wardrobeItems = remember(refreshKey) {
-        loadWardrobeItems(context)
+    val wardrobeItems = remember(refreshKey, profileId) {
+        loadWardrobeItems(context, profileId)
     }
 
     var selectedLayerIndex by remember { mutableStateOf<Int?>(null) }
@@ -264,6 +266,7 @@ fun OutfitDetailsScreen(
                     val updated = withContext(Dispatchers.IO) {
                         renameOutfit(
                             context = context.applicationContext,
+                            profileId = profileId,
                             outfitId = current.id,
                             name = name
                         )
@@ -294,6 +297,7 @@ fun OutfitDetailsScreen(
                     val deleted = withContext(Dispatchers.IO) {
                         deleteOutfit(
                             context = context.applicationContext,
+                            profileId = profileId,
                             outfitId = current.id
                         )
                     }

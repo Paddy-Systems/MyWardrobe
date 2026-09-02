@@ -29,6 +29,7 @@ import com.paddysystems.mywardrobe.data.model.wardrobeLabel
 import com.paddysystems.mywardrobe.data.storage.loadOutfitsUsingItem
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItem
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
+import com.paddysystems.mywardrobe.ui.LocalActiveProfile
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
 import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 import com.paddysystems.mywardrobe.ui.screens.itemdetails.components.ItemOutfitUsageSection
@@ -44,10 +45,12 @@ fun ItemDetailsScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val profileId = LocalActiveProfile.current.id
 
-    val item = remember(itemId, refreshKey) {
+    val item = remember(itemId, refreshKey, profileId) {
         loadWardrobeItem(
             context = context,
+            profileId = profileId,
             itemId = itemId
         )
     }
@@ -67,15 +70,16 @@ fun ItemDetailsScreen(
         return
     }
 
-    val outfits = remember(itemId, refreshKey) {
+    val outfits = remember(itemId, refreshKey, profileId) {
         loadOutfitsUsingItem(
             context = context,
+            profileId = profileId,
             itemId = itemId
         )
     }
 
-    val wardrobeItems = remember(refreshKey) {
-        loadWardrobeItems(context)
+    val wardrobeItems = remember(refreshKey, profileId) {
+        loadWardrobeItems(context, profileId)
     }
 
     val cutoutFile = item.cutoutPath

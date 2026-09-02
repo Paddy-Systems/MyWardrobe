@@ -46,6 +46,7 @@ import com.paddysystems.mywardrobe.data.storage.WardrobeCutoutService
 import com.paddysystems.mywardrobe.data.storage.WardrobeImportQueue
 import com.paddysystems.mywardrobe.data.storage.saveWardrobeItem
 import com.paddysystems.mywardrobe.ml.WardrobeAnalysisService
+import com.paddysystems.mywardrobe.ui.LocalActiveProfile
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
 import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 import com.paddysystems.mywardrobe.ui.components.EditorialSecondaryButton
@@ -62,6 +63,7 @@ fun AddItemScreen(
     onBack: () -> Unit
 ) {
     val context = LocalContext.current
+    val profileId = LocalActiveProfile.current.id
     val scope = rememberCoroutineScope()
 
     var selectedImageUri by remember { mutableStateOf<Uri?>(null) }
@@ -103,6 +105,7 @@ fun AddItemScreen(
                     val staged = withContext(Dispatchers.IO) {
                         WardrobeImportQueue.stageImages(
                             context = context.applicationContext,
+                            profileId = profileId,
                             imageUris = uris
                         )
                     }
@@ -115,6 +118,7 @@ fun AddItemScreen(
 
                     WardrobeBatchImporter.enqueue(
                         context = context.applicationContext,
+                        profileId = profileId,
                         importIds = staged.map { it.id }
                     )
 
@@ -398,6 +402,7 @@ fun AddItemScreen(
                                 val savedItem = withContext(Dispatchers.IO) {
                                     val item = saveWardrobeItem(
                                         context = context.applicationContext,
+                                        profileId = profileId,
                                         imageUri = imageUri,
                                         clothingTypeId = clothingTypeId,
                                         colours = predictedColours,
@@ -408,6 +413,7 @@ fun AddItemScreen(
                                     try {
                                         WardrobeCutoutService.ensureCutout(
                                             context = context.applicationContext,
+                                            profileId = profileId,
                                             item = item
                                         )
                                     } catch (exception: Exception) {

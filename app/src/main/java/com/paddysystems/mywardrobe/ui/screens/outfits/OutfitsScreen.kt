@@ -25,6 +25,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import com.paddysystems.mywardrobe.data.storage.loadOutfits
 import com.paddysystems.mywardrobe.data.storage.loadWardrobeItems
+import com.paddysystems.mywardrobe.ui.LocalActiveProfile
 import com.paddysystems.mywardrobe.ui.components.EditorialPageHeader
 import com.paddysystems.mywardrobe.ui.components.EditorialPrimaryButton
 import com.paddysystems.mywardrobe.ui.screens.outfits.components.OutfitThumbnail
@@ -36,12 +37,13 @@ fun OutfitsScreen(
     onOutfitClick: (String) -> Unit = {}
 ) {
     val context = LocalContext.current
+    val profileId = LocalActiveProfile.current.id
 
-    val outfits = remember(refreshKey) {
-        loadOutfits(context)
+    val outfits = remember(refreshKey, profileId) {
+        loadOutfits(context, profileId)
     }
-    val wardrobeItems = remember {
-        loadWardrobeItems(context)
+    val wardrobeItems = remember(profileId) {
+        loadWardrobeItems(context, profileId)
     }
 
     Column(

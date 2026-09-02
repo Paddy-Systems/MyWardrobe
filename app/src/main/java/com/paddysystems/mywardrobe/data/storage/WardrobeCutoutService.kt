@@ -9,6 +9,7 @@ object WardrobeCutoutService {
 
     fun ensureCutout(
         context: Context,
+        profileId: String,
         item: WardrobeItem
     ): WardrobeItem {
 
@@ -42,6 +43,9 @@ object WardrobeCutoutService {
             updateWardrobeItemCutout(
                 context =
                     context.applicationContext,
+
+                profileId =
+                    profileId,
 
                 item =
                     item,
